@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="classes/" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/apache-ecs-1.4.2"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/commons-net-1.4.1"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/javamail-1_4_1"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
