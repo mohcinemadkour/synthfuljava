@@ -8,18 +8,21 @@ package org.synthful.lang;
 
 public class Empty
 {
-	public Empty()
-	{
-	}
+    static final public String String = "";
 
 	public String toString()
 	{
-		return "";
+		return String;
 	}
 
-	public Object toValue()
+	final public Object toValue()
 	{
 		return null;
+	}
+	
+	final public int toInt()
+	{
+	    return 0;
 	}
 
 }
