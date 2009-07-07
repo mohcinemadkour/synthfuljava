@@ -1,5 +1,6 @@
 package org.synthful.gwt.http.servlet.server;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -21,6 +22,14 @@ abstract public class JspServiceBeanable
     protected JspResponseWriter shuntJspOutput(PageContext pageContext)
     {
         this.jspContext = pageContext;
+        try {
+            this.jspOut.clearBuffer();
+        }
+        catch(IOException e)
+        {
+            this.jspOut = new JspResponseWriter();
+        }
+        
         pageContext.pushBody(this.jspOut);
         return jspOut;
     }
@@ -37,13 +46,14 @@ abstract public class JspServiceBeanable
         }
         catch (Exception e)
         {
+            e.printStackTrace();
         }
 
         this.jspContext.popBody();
         
         return this.jspOut.Body.toString();
     }
-    
+
     @Override
     public void jspDestroy()
     {
@@ -55,5 +65,4 @@ abstract public class JspServiceBeanable
     {
         System.out.println("jspInit");
     }
-
 }
