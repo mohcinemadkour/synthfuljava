@@ -11,15 +11,10 @@
 package com.google.gwt.user.client.ui;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import org.synthful.gwt.domElements.client.DomUtils;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasAllMouseHandlers;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
