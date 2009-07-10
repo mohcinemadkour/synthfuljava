@@ -1,0 +1,14 @@
+#JSP Custom Tag for encapsulating continuous blocks of texts
+
+= Introduction =
+How would you like to be able to do this in your JSP?
+
+<text id='lineQuery'>
+select <%=selection%> from <%=table%>
+where <%=mrbean.getGriteria(filterItems)%>
+</text>
+<%
+myJdbcConn.query(lineQuery);
+%>
+
+= Details =
