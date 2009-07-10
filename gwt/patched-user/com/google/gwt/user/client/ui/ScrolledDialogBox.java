@@ -10,6 +10,9 @@
  */
 package com.google.gwt.user.client.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.synthful.gwt.domElements.client.DomUtils;
 
 import com.google.gwt.dom.client.Document;
@@ -97,26 +100,41 @@ public class ScrolledDialogBox
         implements Caption
     {
     }
+
+    // The events are not firing normally because DialogBox has over-riden
+    // onBrowserEvent with some obtuse logic.
+    // So we have to create our own tiny system of event handling for the closer button
+    // in conjunction with List<AntiObtusedCloserHandler>
+    public interface CloserEventHandler
+    {
+        public void onClick(Event event);
+        public void onMouseOver(Event event);
+        public void onMouseOut(Event event);
+    }
+    /*
+     *     
+     * @gwt.TypeArgs parameters <java.util.ArrayList<com.google.gwt.user.client.ui.ScrolledDialogBox.CloserEventHandler>>
+     */
+    final public ArrayList<CloserEventHandler> CloserEventHandlers =
+        new ArrayList<CloserEventHandler>();
     
-    private class CloserHandler implements ClickHandler, MouseOverHandler, MouseOutHandler
+    private class CloserHandler
+    implements CloserEventHandler
     {
 
-        @Override
-        public void onClick(ClickEvent event) {
-                hide();
-                Window.alert("Click!");
+        public void onClick(Event event)
+        {
+            hide();
         }
 
-        @Override
-        public void onMouseOver(MouseOverEvent event) {
-                DOM.setStyleAttribute(closer.getElement(), "color", "red");
-
+        public void onMouseOver(Event event)
+        {
+            DOM.setStyleAttribute(closer.getElement(), "color", "red");
         }
 
-        @Override
-        public void onMouseOut(MouseOutEvent event) {
-                DOM.setStyleAttribute(closer.getElement(), "color", "black");
-
+        public void onMouseOut(Event event)
+        {
+            DOM.setStyleAttribute(closer.getElement(), "color", "black");
         }
     }
 
@@ -171,19 +189,18 @@ public class ScrolledDialogBox
 
     private CaptionImpl caption = new CaptionImpl();
 
-    private boolean dragging;
+    protected boolean dragging;
 
-    private int dragStartX, dragStartY;
+    protected int dragStartX, dragStartY;
 
-    private int windowWidth;
+    protected int windowWidth;
 
-    private int clientLeft;
+    protected int clientLeft;
 
-    private int clientTop;
+    protected int clientTop;
 
     private HandlerRegistration resizeHandlerRegistration;
 
-    final CloserHandler closerHandler = new CloserHandler();
     /**
      * Creates an empty dialog box. It should not be shown until its child
      * widget has been added using {@link #add(Widget)}.
@@ -226,7 +243,7 @@ public class ScrolledDialogBox
         super(autoHide, modal, "dialog");
 
         // Add the caption to the top row of the decorator panel. We need to
-        // logically adopt the caption so we can catch mouse events.
+        // logically adopt the caption panel so we can catch mouse events.
         Element td = getCellElement(0, 1);
         DOM.appendChild(td, this.CaptionPanel.getElement());
         adopt(this.CaptionPanel);
@@ -235,11 +252,11 @@ public class ScrolledDialogBox
         super.setWidget(this.BodyPanel);
         this.setWidthPx(200);
 
-        final ScrolledDialogBox thisdialogbox = this;
+        this.CloserEventHandlers.add(new CloserHandler());
 
-        //closer.addClickHandler(closerHandler); 
-        //closer.addMouseOutHandler(closerHandler);
-        //closer.addMouseOverHandler(closerHandler);
+        // closer.addClickHandler(closerHandler);
+        // closer.addMouseOutHandler(closerHandler);
+        // closer.addMouseOverHandler(closerHandler);
 
         this.CaptionPanel.setStyleName("Caption");
 
@@ -297,23 +314,25 @@ public class ScrolledDialogBox
     {
         if (isCaptionControlEvent(event))
         {
-            switch (event.getTypeInt())
+            for(CloserEventHandler handler: this.CloserEventHandlers)
             {
-                case Event.ONMOUSEUP:
-                case Event.ONCLICK:
-                    this.hide();
-                    break;
-                case Event.ONMOUSEOVER:
-                    DOM.setStyleAttribute(closer.getElement(), "color", "red");
-                    break;
-                case Event.ONMOUSEOUT:
-                    DOM.setStyleAttribute(closer.getElement(), "color", "black");
-                    break;
-            }
-            
+                switch (event.getTypeInt())
+                {
+                    case Event.ONMOUSEUP:
+                    case Event.ONCLICK:
+                        handler.onClick(event);
+                        break;
+                    case Event.ONMOUSEOVER:
+                        handler.onMouseOver(event);
+                        break;
+                    case Event.ONMOUSEOUT:
+                        handler.onMouseOut(event);
+                        break;
+                }
+            }    
             return;
         }
-        
+
         // If we're not yet dragging, only trigger mouse events if the event
         // occurs
         // in the caption wrapper
@@ -324,11 +343,10 @@ public class ScrolledDialogBox
             case Event.ONMOUSEMOVE:
             case Event.ONMOUSEOVER:
             case Event.ONMOUSEOUT:
-            if (!dragging)
-            {
-                if (!isCaptionEvent(event))
-                    return;
-            }
+                if (!dragging)
+                {
+                    if (!isCaptionEvent(event)) return;
+                }
         }
 
         super.onBrowserEvent(event);
@@ -345,7 +363,7 @@ public class ScrolledDialogBox
         DOM.setCapture(getElement());
         dragStartX = x;
         dragStartY = y;
-        //System.out.println("onMouseDown:"+sender);
+        // System.out.println("onMouseDown:"+sender);
     }
 
     /**
@@ -400,7 +418,7 @@ public class ScrolledDialogBox
     {
         dragging = false;
         DOM.releaseCapture(getElement());
-        //System.out.println("onMouseUp:"+sender);
+        // System.out.println("onMouseUp:"+sender);
     }
 
     /**
@@ -456,21 +474,21 @@ public class ScrolledDialogBox
     public void setHeightPx(
         int hgt)
     {
-        this.setWidth(hgt + "px");
+        this.BodyPanel.setWidth(hgt + "px");
         this.Height = hgt;
     }
 
     public void setWidthPx(
         int wid)
     {
-        this.setWidth(wid + "px");
+        this.BodyPanel.setWidth(wid + "px");
         this.initCaptionWidths(wid);
     }
 
     public void setSizePx(
         int wid, int hgt)
     {
-        super.setSize(wid + "px", hgt + "px");
+        this.BodyPanel.setSize(wid + "px", hgt + "px");
         this.Height = hgt;
         this.initCaptionWidths(wid);
     }
@@ -593,9 +611,8 @@ public class ScrolledDialogBox
 
         if (!event.isCanceled() && (event.getTypeInt() == Event.ONMOUSEDOWN))
         {
-            //System.out.println("nativeEvent:"+nativeEvent);
-            if (isCaptionEvent(nativeEvent))
-                nativeEvent.preventDefault();
+            // System.out.println("nativeEvent:"+nativeEvent);
+            if (isCaptionEvent(nativeEvent)) nativeEvent.preventDefault();
         }
 
         super.onPreviewNativeEvent(event);
@@ -606,21 +623,22 @@ public class ScrolledDialogBox
     {
         return isWidgetEvent(event, this.CaptionPanel.getWidget(0));
     }
-    
+
     protected boolean isCaptionControlEvent(
         NativeEvent event)
     {
         return isWidgetEvent(event, this.CaptionPanel.getWidget(1));
     }
-    
-    protected boolean isWidgetEvent(NativeEvent event, Widget w)
+
+    static protected boolean isWidgetEvent(
+        NativeEvent event, Widget w)
     {
         EventTarget target = event.getEventTarget();
         if (Element.is(target))
         {
             boolean t = w.getElement().isOrHasChild(Element.as(target));
-            //if (t)
-            //    System.out.println("isWidgetEvent:"+w+':'+target+':'+t);
+            // if (t)
+            // System.out.println("isWidgetEvent:"+w+':'+target+':'+t);
             return t;
         }
         return false;
