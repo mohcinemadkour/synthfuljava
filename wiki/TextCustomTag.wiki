@@ -3,6 +3,7 @@
 = Introduction =
 How would you like to be able to do this in your JSP?
 
+{{{
 <text id='lineQuery'>
 select <%=selection%> from <%=table%>
 where <%=mrbean.getGriteria(filterItems)%>
@@ -10,5 +11,6 @@ where <%=mrbean.getGriteria(filterItems)%>
 <%
 myJdbcConn.query(lineQuery);
 %>
+}}}
 
 = Details =
