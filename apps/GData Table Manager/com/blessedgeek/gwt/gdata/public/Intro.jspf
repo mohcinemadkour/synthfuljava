@@ -1,0 +1,13 @@
+<%
+String serverInfo = getServletContext().getServerInfo();
+String userAgent = request.getHeader("User-Agent");
+%>
+
+This server is running " <%=serverInfo%><br><br>
+You seem to be using <%=userAgent%><br><br>
+
+UTF-8 Encoding
+<table>
+<tr>
+
+</tr></table>

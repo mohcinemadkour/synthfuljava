@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module rename-to="TableMgr">
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name="com.google.gwt.user.User"/>
+  <inherits name="com.google.gwt.user.Patched-User"/>
+
+  <!-- Inherit the default GWT style sheet.  You can change       -->
+  <!-- the theme of your GWT application by uncommenting          -->
+  <!-- any one of the following lines.                            -->
+  <inherits name="com.google.gwt.user.theme.standard.Standard"/>
+  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+
+  <!-- Other module inherits                                      -->
+ <inherits name="org.synthful.gwt.http.servlet.OriginServerCall"/>
+ <inherits name="org.synthful.gwt.domElements.DomElements"/>
+ <inherits name="org.synthful.gwt.gdata.GData"/>
+ <inherits name="org.synthful.gwt.widgets.Widgets"/>
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class="com.blessedgeek.gwt.gdata.client.TableMgr"/>
+</module>

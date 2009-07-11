@@ -1,0 +1,28 @@
+<%@ page
+contentType="text/html; charset=utf-8"
+language="java"
+extends="com.blessedgeek.gwt.gdata.server.TableMgrJspBeanable"
+import="
+java.util.List,
+com.google.gdata.data.spreadsheet.TableEntry"
+%>
+<jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean"/>\
+<table>
+<%
+List<TableEntry> entries =  mrBean.FeedsHdlr.listTables();
+
+if (entries.size() == 0)
+{
+    %>No tables found<%
+}
+
+for (TableEntry entry : entries)
+{
+    %>
+    <tr>
+    <td><%=entry%></td>
+    </tr>
+    <%
+}
+%>
+</table>
