@@ -9,12 +9,9 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.ScrolledDialogBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.ScrolledDialogBox.Caption;
 
 /**
  * This class is an attempt to patch DialogBox to give it a close
@@ -35,40 +32,52 @@ import com.google.gwt.user.client.ui.ScrolledDialogBox.Caption;
  * @author Icecream
  *
  */
-public class ScrollableDialogBox
+public class UnusableScrollableDialogBox
     extends DialogBox
 {
-    public ScrollableDialogBox()
+    public UnusableScrollableDialogBox()
     {
         this(false);
     }
 
-    public ScrollableDialogBox(
+    public UnusableScrollableDialogBox(
         boolean autoHide)
     {
         this(autoHide, true);
     }
 
-    public ScrollableDialogBox(
+    public UnusableScrollableDialogBox(
         boolean autoHide, boolean modal)
     {
         super(autoHide, modal);
 
         Element td01 = getCellElement(0, 1);
+        
+        // We should reuse the caption so that getCaption, getText and getHtml
+        // methods do not need to be rewritten and over-riden.
         Widget caption = (Widget)this.getCaption();
+        
+        // The following fails because removeFromParent requires
+        // parent's private widget = caption, but caption was adopted not added
+        // so the parent did not register it as a child widget.
+        caption.removeFromParent(); 
+        Widget p = caption.getParent();
         DOM.removeChild(td01, caption.getElement());
         DOM.appendChild(td01, this.CaptionPanel.getElement());
-        adopt(this.CaptionPanel);
         
-        this.CaptionTitle = new CaptionTitle();
-        CaptionPanel.add(this.CaptionTitle);
+        // The following fails because add() function requires prospective child
+        // widget to have null parent, but earlier parent's failure to acknowledge
+        // caption as a child aborted the parent removal procedure resulting
+        // in the child still acknowledging the parent.
+        CaptionPanel.add(caption);
+        adopt(this.CaptionPanel);
+                
         CaptionPanel.add(this.closer);
         super.setWidget(this.BodyPanel);
         this.setWidthPx(200);
-        
+
         this.CloserEventHandlers.add(new CloserHandler());
 
-        this.CaptionPanel.setStyleName("Caption");
     }
     
     public void setAlwaysShowScrollBars(
@@ -117,33 +126,6 @@ public class ScrollableDialogBox
     {
         this.Width = wid;
         this.CaptionPanel.setWidth(this.Width + "px");
-    }
-
-    public final Caption getCaptionTitle()
-    {
-        return this.CaptionTitle;
-    }
-
-    public String getHTML()
-    {
-        return this.CaptionTitle.getHTML();
-    }
-
-    public String getText()
-    {
-        return this.CaptionTitle.getText();
-    }
-
-    public void setHTML(
-        String html)
-    {
-        this.CaptionTitle.setHTML(html);
-    }
-
-    public void setText(
-        String text)
-    {
-        this.CaptionTitle.setText(text);
     }
 
     protected boolean isCaptionControlEvent(
@@ -230,16 +212,9 @@ public class ScrollableDialogBox
         }
     }
 
-    protected class CaptionTitle
-    extends HTML
-    implements Caption
-    {
-    }
-
     final public HorizontalPanel CaptionPanel = new HorizontalPanel();
     final private Button closer = new Button("X");
     final private ScrollPanel BodyPanel = new ScrollPanel();
     public int Width, Height;
-    protected CaptionTitle CaptionTitle;
 
 }

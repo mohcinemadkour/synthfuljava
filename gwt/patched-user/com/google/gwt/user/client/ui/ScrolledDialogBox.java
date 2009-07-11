@@ -239,8 +239,8 @@ public class ScrolledDialogBox
 
         // Add the caption to the top row of the decorator panel. We need to
         // logically adopt the caption panel so we can catch mouse events.
-        Element td = getCellElement(0, 1);
-        DOM.appendChild(td, this.CaptionPanel.getElement());
+        Element td01 = getCellElement(0, 1);
+        DOM.appendChild(td01, this.CaptionPanel.getElement());
         adopt(this.CaptionPanel);
         CaptionPanel.add(this.caption);
         CaptionPanel.add(this.closer);
