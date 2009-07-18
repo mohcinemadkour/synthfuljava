@@ -1,4 +1,5 @@
 #java.util.Hashtable built into a tree
+http://code.google.com/p/synthfuljava/source/browse/#svn/trunk/common/org/synthful/util
 
 = Introduction =
 Build a hierarchical hash tree where you could store and retrieve objects using dotted or oblique namespace -
