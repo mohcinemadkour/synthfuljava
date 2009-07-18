@@ -12,27 +12,11 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.ScrolledDialogBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.ScrolledDialogBox.Caption;
 
 /**
- * This class is an attempt to patch DialogBox to give it a close
- * button at the right corner of the caption.<br>
  * 
- * This class is unusable as explained in comments in the constructor
- * below. It is retained as an illustration why we have to use the
- * patch rather than subclass DialogBox.
- * 
- * The patch is found as
- * com.google.gwt.user.client.ui.ScrolledDialogBox .
- * 
- * It has to be patched rather than over-riden because all the
- * essential innards required to give a viable close button are
- * either private or protected - as evidenced in the explanation
- * in the constructor below.
- * 
- * @author Icecream
+ * @author Blessed Geek
  *
  */
 public class ScrollableDialogBox
@@ -69,6 +53,7 @@ public class ScrollableDialogBox
         this.CloserEventHandlers.add(new CloserHandler());
 
         this.CaptionPanel.setStyleName("Caption");
+        DOM.setStyleAttribute(closer.getElement(), "color", "black");
     }
     
     public void setAlwaysShowScrollBars(
@@ -217,6 +202,7 @@ public class ScrollableDialogBox
         public void onClick(Event event)
         {
             hide();
+            DOM.setStyleAttribute(closer.getElement(), "color", "black");
         }
 
         public void onMouseOver(Event event)

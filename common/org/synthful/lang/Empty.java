@@ -8,6 +8,13 @@ package org.synthful.lang;
 
 public class Empty
 {
+	static public interface EmptyFactory
+	{
+	  Empty EMPTY = new Empty();
+	}
+	
+	public Empty(){}
+    
     static final public String String = "";
 
 	public String toString()

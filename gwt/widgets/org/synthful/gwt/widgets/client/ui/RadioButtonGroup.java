@@ -86,6 +86,9 @@ public class RadioButtonGroup
             if (Buttons[i].getValue())
                 return Buttons[i];
         
+        if (defaultButton<0)
+            return null;
+        
         Buttons[defaultButton].setValue(true);
         return Buttons[defaultButton];
     }
@@ -94,17 +97,5 @@ public class RadioButtonGroup
     String RadioGroup;
     int defaultButton;
     
-    static final public class LabelValuePair
-    {
-        public LabelValuePair(String label, String value)
-        {
-            this.Label = label;
-            this.Value = value;
-        }
-        
-        String Label;
-        String Value;
-    }
-
     protected CellPanel Panel;
 }

@@ -9,18 +9,26 @@
 
 package org.synthful.util;
 
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.synthful.lang.Empty;
+import org.synthful.lang.Empty.EmptyFactory;
+
 /**
  * 
  * 
  * @author Blessed Geek
  */
-public class toStringBuffer
+public class ToStringBuffer
+implements EmptyFactory
 {
     
     /**
 	 * Creates a new instance of toStringBuffer.
 	 */
-    public toStringBuffer ()
+    public ToStringBuffer ()
     {
         StrBuf = new StringBuffer ();
     }
@@ -30,7 +38,7 @@ public class toStringBuffer
 	 * 
 	 * @param format
 	 */
-    public toStringBuffer (long format)
+    public ToStringBuffer (Format format)
     {
         StrBuf = new StringBuffer ();
         switchFormat (format);
@@ -40,56 +48,47 @@ public class toStringBuffer
 	 * Set print attributes depending on format.
 	 * @param format
 	 */
-    protected void switchFormat (long format)
+    protected void switchFormat (Format format)
     {
-    	switch ((int)format)
+    	switch (format)
     	{
     		case PLAINDump:    			
-				Indentation = "";
-				ItemDelimiter = " ";
-				NodeDelimiter = " ";
-				NodeTerminatorLeft = "";
-				NodeTerminatorRight = "";
+				this.Indentation = "";
+				this.ItemDelimiter = " ";
+				this.NodeDelimiter = " ";
+				this.NodeTerminatorLeft = "";
+				this.NodeTerminatorRight = "";
 				return;
 				
     		case PRETTYDump:
-	            Indentation = "  ";
-	            ItemDelimiter = ",";
-	            NodeDelimiter = "";
-	            NodeTerminatorLeft = "{";
-	            NodeTerminatorRight = "}";
+    			this.Indentation = "  ";
+    			this.ItemDelimiter = ",";
+    			this.NodeDelimiter = ",\n@i(+1)";
+    			this.NodeTerminatorLeft = "{\n@i(+1)";
+    			this.NodeTerminatorRight = "\n@i}";
+    			this.ItemTerminatorLeft = "[";
+    			this.ItemTerminatorRight = "]";
 	            return;
         
     		case CSVDump:
-	            Indentation = "";
-	            ItemDelimiter = ",";
-	            NodeDelimiter = "\n";
-	            NodeTerminatorLeft = "";
-	            NodeTerminatorRight = "";
+    			this.Indentation = "";
+    			this.ItemDelimiter = ",";
+    			this.NodeDelimiter = ",";
+    			this.NodeTerminatorLeft = "";
+    			this.NodeTerminatorRight = "";
 	            return;
         
-    		case HTMLCell:
-	            Indentation = null;
-	            ItemDelimiter = "<BR>";
-	            NodeDelimiter = "";
-	            NodeTerminatorLeft = "<TD>";
-	            NodeTerminatorRight = "</TD>";
-	            return;
     	}
     }
     
-    /**
-	 * Converts to StringBuffer.
-	 * 
-	 * @param node
-	 * 
-	 * @return node as StringBuffer
-	 */
-    public StringBuffer toStringBuffer (TreeNode node)
-    {
-        return toStringBuffer (node, 0);
-    }
     
+    public StringBuffer toStringBuffer (ToStringBufferable o, Format format)
+    {
+    	this.switchFormat(format);
+    	o.toStringBuffer (this, 0, 0);
+    	return this.StrBuf;
+    }
+
     /**
 	 * Converts to StringBuffer.
 	 * 
@@ -98,10 +97,12 @@ public class toStringBuffer
 	 * 
 	 * @return Object o as StringBuffer
 	 */
-    public StringBuffer toStringBuffer (Object o, int depth)
+    public StringBuffer toStringBuffer (Object o, int depth, int iteration)
     {
         if (o==null)
-            StrBuf.append(NullObj);
+            o = EMPTY;
+        else if (o instanceof ToStringBufferable)
+        	((ToStringBufferable)o).toStringBuffer(this, depth, iteration);
         else
             appendValues(o, depth);
 
@@ -115,60 +116,29 @@ public class toStringBuffer
 	 * @param depth
 	 */
     protected void appendValues (Object o, int depth)
-    {
-        if (NodeTerminatorLeft!=null)
-            StrBuf.append (NodeTerminatorLeft);
+    {        
+        if (o instanceof Object[])
+        {
+        	this.appendNotNull(this.ItemTerminatorLeft);
         
-        if (o instanceof TreeNode)
-            append((TreeNode)o, depth);
-        else if (o instanceof Object[])
             append((Object[])o, depth);
+        
+            this.appendNotNull(this.ItemTerminatorRight);
+        }
         else
         {
-            if (ItemTerminatorLeft!=null)
-                StrBuf.append(ItemTerminatorLeft);
-        
-            StrBuf.append(o);     
-        
-            if (ItemTerminatorRight!=null)
-                StrBuf.append(ItemTerminatorRight);
-        }
-        
-        if (NodeTerminatorRight!=null)
-            StrBuf.append (NodeTerminatorRight);
+            StrBuf.append(this.StringQuote).append(o).append(this.StringQuote);     
+        }        
     }
-
-    /**
-	 * Append.
-	 * 
-	 * @param node
-	 * @param depth
-	 */
-    protected void append (TreeNode node, int depth)
+    
+    public void appendNotNull(Object o)
     {
-        StringBuffer indent = mkIndentation(depth);
-        
-        for (int i = 0; i < node.size (); i++)
-        {            
-            if (indent!=null)
-                StrBuf.append(indent).append(Indentation);
-            if (node instanceof HashTreeNode)
-                StrBuf.append (""+ ((HashTreeNode)node).getKey (i));
-
-            toStringBuffer (node.get (i), depth+1);
-
-            if (i < node.size()-1 && ItemDelimiter!=null)
-                StrBuf.append (ItemDelimiter);
-
-            if (node instanceof HashTreeNode)
-                if (NodeDelimiter!=null)
-                    StrBuf.append (NodeDelimiter);
-        }
-        
-        if (indent!=null)
-            StrBuf.append(indent);
-
+    	if(o!=null)
+    	{
+    		this.StrBuf.append(o.toString());
+    	}
     }
+
     
     /**
 	 * Append.
@@ -178,17 +148,84 @@ public class toStringBuffer
 	 */
     protected void append (Object[] o, int depth)
     {
-        StringBuffer indent = mkIndentation(depth);
-
         for (int i = 0; i < o.length; i++)
         {            
-            toStringBuffer (o[i], depth+1);
+            toStringBuffer (o[i], depth+1, i);
             if (i < o.length-1 && ItemDelimiter!=null)
                 StrBuf.append (ItemDelimiter);
         }
         
-        if (indent!=null)
-            StrBuf.append(indent);
+        StringBuffer indent = mkIndentation(depth);
+        this.appendNotNull(indent);
+    }
+    
+    public void appendFillers(Fillers filler, int indentDepth)
+    {
+    	String fillerStr;
+    	
+    	switch (filler)
+		{
+		    case Indentation:
+				fillerStr = this.Indentation;
+				break;
+		    case PairSeparator:
+				fillerStr = this.PairSeparator;
+				break;
+		    case ItemDelimiter:
+				fillerStr = this.ItemDelimiter;
+				break;
+		    case ItemTerminatorLeft:
+				fillerStr = this.ItemTerminatorLeft;
+				break;
+		    case ItemTerminatorRight:
+				fillerStr = this.ItemTerminatorRight;
+				break;
+		    case NodeDelimiter:
+				fillerStr = this.NodeDelimiter;
+				break;
+		    case NodeTerminatorLeft:
+				fillerStr = this.NodeTerminatorLeft;
+				break;
+		    case NodeTerminatorRight:
+				fillerStr = this.NodeTerminatorRight;
+				break;
+			default:
+				fillerStr = null;
+		}
+    	
+    	Matcher m = indentMatcher.matcher(fillerStr);
+    	this.StrBuf.ensureCapacity(this.StrBuf.length() + fillerStr.length());
+    	int c0 = 0;
+    	
+    	while(m.find())
+    	{
+    		String g6 = m.group(6);
+    		String g5 = m.group(5);
+    		String g3 = m.group(3);
+    		
+    		//Regex string is structured so thata all matches also matches g1
+    		//Use g0 start/end for substitution.
+    		if (m.start()>0)
+    			this.StrBuf.append(fillerStr.subSequence(c0, m.start()));
+    		c0 = m.end();
+    		
+    		//g6 match = @i requires no change in indentDepth
+    		
+    		//g5:n match = g4:(n) = g0:@i(n)
+    		if (g5!=null)
+    		{
+    			indentDepth = Integer.parseInt(g5);
+    		}
+    		//g3:+/-n match = g2:(+/-n) = g0:@(i+/-n)
+    		else if (g3!=null)
+    		{
+    			indentDepth += Integer.parseInt(g3);
+    		}
+    		
+    		this.StrBuf.append(this.mkIndentation(indentDepth));
+    	}
+    	
+    	this.StrBuf.append(fillerStr.substring(c0));
     }
     
     /**
@@ -196,18 +233,18 @@ public class toStringBuffer
 	 * 
 	 * @return Clear as toStringBuffer
 	 */
-    public toStringBuffer clear()
+    public ToStringBuffer clear()
     {
         StrBuf = new StringBuffer ();
         return this;
     }
     
-    private StringBuffer mkIndentation(int depth)
+    public StringBuffer mkIndentation(int depth)
     {
         if (Indentation!=null&&Indentation.length()>0)
         {
             StringBuffer indent = new StringBuffer(depth*Indentation.length());
-            indent.append('\n');
+            //indent.append('\n');
             for (int i=0;i<depth;i++)
                 indent.append(Indentation);
             return indent;
@@ -215,11 +252,23 @@ public class toStringBuffer
         return null;
     }
     
+    public StringBuffer getStringBuffer()
+    {
+    	return StrBuf;
+    }
+    
+    static public interface  ToStringBufferable
+    {
+    	StringBuffer toStringBuffer(ToStringBuffer tostrbuf, int depth, int iteration);
+    }
+    
     /** Variable StrBuf. */
     StringBuffer StrBuf;
     
     /** Variable Indentation. */
     public String Indentation = " ";
+    
+    public String PairSeparator = ":";
     
     /** Variable ItemDelimiter. */
     public String ItemDelimiter = " ";
@@ -239,18 +288,30 @@ public class toStringBuffer
     /** Variable NodeTerminatorRight. */
     public String NodeTerminatorRight = "\n";
     
-    /** Variable PLAINDump. */
-    final static public int PLAINDump = 0;
+    public char StringQuote = '"';
     
-    /** Variable PRETTYDump. */
-    final static public int PRETTYDump = 1;
+    final static private String indentMatchStr =
+    	"@i((\\([+-]([0-9]+)\\))|(\\(([0-9]+)\\))|())";
     
-    /** Variable CSVDump. */
-    final static public int CSVDump = 2;
-    
-    /** Variable HTMLCell. */
-    final static public int HTMLCell = 3;
-    
-    /** Variable NullObj. */
-    static public Object NullObj = "";
+	final static private Pattern indentMatcher =
+		Pattern.compile(ToStringBuffer.indentMatchStr);
+	
+    static public enum Fillers
+    {
+        Indentation,
+        PairSeparator,
+        ItemDelimiter,
+        ItemTerminatorLeft,
+        ItemTerminatorRight,
+        NodeDelimiter,
+        NodeTerminatorLeft,
+        NodeTerminatorRight
+    }
+        
+    static public enum Format
+    {
+    	PLAINDump,
+    	PRETTYDump,
+    	CSVDump
+    }
 }
