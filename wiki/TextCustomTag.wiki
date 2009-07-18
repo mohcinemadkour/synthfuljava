@@ -14,3 +14,7 @@ myJdbcConn.query(lineQuery);
 }}}
 
 = Details =
+
+http://www.nesug.org/proceedings/nesug04/ap/ap02.pdf
+
+is an example of dynamically piping scripts into a non-JEE application server by embedding the scripts within the JSP text custom tag.
