@@ -6,19 +6,26 @@
  */
 package org.synthful.util;
 
-import java.util.Enumeration;
 import java.util.Collection;
 import java.util.Vector;
+
+import org.synthful.util.ToStringBuffer.Format;
+import org.synthful.util.ToStringBuffer.ToStringBufferable;
 
 /**
  * VectorNode Class.
  */
 public class VectorNode
 extends Vector
-implements TreeNode
+implements TreeNode, ToStringBufferable
 {
     
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3717515568044106572L;
+
+	/**
 	 * Instantiates a new VectorNode.
 	 */
     public VectorNode ()
@@ -223,34 +230,45 @@ implements TreeNode
         return this;
     }
     
-    /* (non-Javadoc)
+    /**
      * @see org.synthful.util.TreeNode#toString(java.lang.String, java.lang.String)
      */
     public String toString (
     String itemdelimiter, String nodedelimiter)
     {
-        toStringBuffer tostrbuf = new toStringBuffer(toStringBuffer.PRETTYDump);
+    	ToStringBuffer tostrbuf = new ToStringBuffer(Format.PRETTYDump);
         tostrbuf.ItemDelimiter = itemdelimiter;
         tostrbuf.NodeDelimiter = nodedelimiter;
-        return "" + toStringBuffer (tostrbuf);
+        return "" + toStringBuffer (tostrbuf, 0, 0);
     }
     
-    /* (non-Javadoc)
+    /**
      * @see org.synthful.util.TreeNode#toStringBuffer(org.synthful.util.toStringBuffer)
      */
-    public StringBuffer toStringBuffer (toStringBuffer tostrbuf)
+    public StringBuffer toStringBuffer (ToStringBuffer tostrbuf, int depth, int iteration)
     {
-        return tostrbuf.toStringBuffer (this);        
+        StringBuffer indent = tostrbuf.mkIndentation(depth);
+    	StringBuffer strBuf = tostrbuf.getStringBuffer();
+    	
+        if (indent!=null)
+            strBuf.append(indent).append(indent);
+    	strBuf.append(tostrbuf.ItemTerminatorLeft);
+    	
+    	for(int i=0; i<this.size(); i++)
+    	{
+    		Object val = this.get(i);
+            
+            if (i>0)
+            	strBuf.append(tostrbuf.NodeDelimiter);
+            
+            tostrbuf.toStringBuffer(val, depth, i);
+            //StrBuf.append(vbuf);
+    	}
+    	
+        strBuf.append(tostrbuf.NodeTerminatorRight);
+        return tostrbuf.StrBuf;
     }
     
-    /* (non-Javadoc)
-     * @see org.synthful.util.TreeNode#toStringBuffer(long)
-     */
-    public StringBuffer toStringBuffer (long format)
-    {
-        return new toStringBuffer (format).toStringBuffer (this);
-    }
-
     /** Variable KeyDelimiter. */
     protected char KeyDelimiter = '/';
     

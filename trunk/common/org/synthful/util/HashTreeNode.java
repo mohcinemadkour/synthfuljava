@@ -6,12 +6,14 @@
  */
 package org.synthful.util;
 
-import java.util.Enumeration;
-import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
-import org.synthful.lang.Lang;
+import java.util.Vector;
+
+import org.synthful.lang.Empty.EmptyFactory;
+import org.synthful.util.ToStringBuffer.Fillers;
+import org.synthful.util.ToStringBuffer.ToStringBufferable;
 
 /**
  * HashTreeNode Class. Is a combination of Hashtable and Vector extended to
@@ -25,7 +27,7 @@ import org.synthful.lang.Lang;
  */
 public class HashTreeNode
 extends Hashtable
-implements TreeNode, Lang
+implements TreeNode, EmptyFactory, ToStringBufferable
 {
     
     /**
@@ -225,7 +227,7 @@ implements TreeNode, Lang
 	 * 
 	 * @return Hash key of object stored at that position.
 	 */
-    public Object getKey (int position)
+    public String getKey (int position)
     {
         if (position < KeysVector.size () && position >= 0)
             return KeysVector.get (position);
@@ -376,8 +378,10 @@ implements TreeNode, Lang
 	 */
     protected HashTreeNode putValue (String key, Object value)
     {
+        if(key==null)
+            key=EMPTY.toString();
         if(value==null)
-            value=Empty;
+            value=EMPTY;
         ( (Hashtable)this).put (key, value);
         KeysVector.add (key);
         if (value instanceof TreeNode)
@@ -493,30 +497,37 @@ implements TreeNode, Lang
     public StringBuffer toStringBuffer (
     String itemdelimiter, String nodedelimiter)
     {
-        toStringBuffer tostrbuf = new toStringBuffer ();
+    	ToStringBuffer tostrbuf = new ToStringBuffer ();
         tostrbuf.ItemDelimiter = itemdelimiter;
         tostrbuf.NodeDelimiter = nodedelimiter;
         
-        return toStringBuffer (tostrbuf);
+        return this.toStringBuffer (tostrbuf, 0, 0);
     }
     
-    /* (non-Javadoc)
-     * @see org.synthful.util.TreeNode#toStringBuffer(org.synthful.util.toStringBuffer)
-     */
-    public StringBuffer toStringBuffer (toStringBuffer tostrbuf)
+    public StringBuffer toStringBuffer (ToStringBuffer tostrbuf, int depth, int iteration)
     {
-        return tostrbuf.toStringBuffer (this);
-    }
+        StringBuffer indent = tostrbuf.mkIndentation(depth);
+        StringBuffer strBuf = tostrbuf.getStringBuffer();
+        
+        tostrbuf.appendFillers(Fillers.NodeTerminatorLeft, depth);
+        
+        for (int i = 0; i < this.size (); i++)
+        {
+	        if (i > 0)
+	        	tostrbuf.appendFillers (Fillers.NodeDelimiter, depth);
+            
+            strBuf.append (this.getKey (i));
+            tostrbuf.appendFillers(Fillers.PairSeparator, depth);
 
-    /* (non-Javadoc)
-     * @see org.synthful.util.TreeNode#toStringBuffer(long)
-     */
-    public StringBuffer toStringBuffer (long format)
-    {
-        return new toStringBuffer (format).toStringBuffer (this);
-    }
+            tostrbuf.toStringBuffer (this.get (i), depth+1, i);
+        }
+        
+        tostrbuf.appendFillers(Fillers.NodeTerminatorRight, depth);
+        
+		return strBuf;
 
-    /* (non-Javadoc)
+    }
+    /**
      * @see org.synthful.util.TreeNode#getParentNode()
      */
     public TreeNode getParentNode ()
@@ -524,7 +535,7 @@ implements TreeNode, Lang
         return ParentNode;
     }
     
-    /* (non-Javadoc)
+    /**
      * @see org.synthful.util.TreeNode#getNode(int)
      */
     public TreeNode getNode (int i)
@@ -535,7 +546,7 @@ implements TreeNode, Lang
         return null;
     }
     
-    /* (non-Javadoc)
+    /**
      * @see org.synthful.util.TreeNode#setKeyDelimiter(char)
      */
     public TreeNode setKeyDelimiter (char delimiter)
@@ -544,7 +555,7 @@ implements TreeNode, Lang
         return this;
     }
     
-    /* (non-Javadoc)
+    /**
      * @see org.synthful.util.TreeNode#setParentNode(org.synthful.util.TreeNode)
      */
     public TreeNode setParentNode (TreeNode node)
@@ -553,12 +564,15 @@ implements TreeNode, Lang
         return this;
     }
     
+    
+    
     /** Variable KeysVector. */
-    protected Vector KeysVector = new Vector ();
+    protected Vector<String> KeysVector = new Vector<String> ();
     
     /** Variable KeyDelimiter. */
     protected char KeyDelimiter = '/';
     
     /** Variable ParentNode. */
     protected TreeNode ParentNode;
+
 }

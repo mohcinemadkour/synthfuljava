@@ -2,11 +2,13 @@ package com.blessedgeek.gwt.gdata.client;
 
 import java.util.HashMap;
 
+import org.synthful.gwt.domElements.client.DomUtils;
 import org.synthful.gwt.gdata.client.FeedsBaseUrl;
 import org.synthful.gwt.widgets.client.ui.AuthFormPanel;
+import org.synthful.gwt.widgets.client.ui.LabelValuePair;
+import org.synthful.gwt.widgets.client.ui.RadioButtonGroup;
 import org.synthful.gwt.widgets.client.ui.ScrollableDialogBox;
 import org.synthful.gwt.widgets.client.ui.VerticalRadioButtonGroup;
-import org.synthful.gwt.widgets.client.ui.RadioButtonGroup.LabelValuePair;
 import org.synthful.gwt.widgets.client.ui.ScrollableDialogBox.CloserEventHandler;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -16,6 +18,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -60,9 +66,11 @@ public class TableMgr
 
     final ScrollableDialogBox dialogBox = new ScrollableDialogBox();
 
+    final VerticalPanel dialogVPanel = new VerticalPanel();
+
     final Label textToServerLabel = new Label();
 
-    final HTML serverResponseLabel = new HTML();
+    final HTML serverResponseHtml = new HTML();
 
     final Label separator = new Label();
 
@@ -149,15 +157,13 @@ public class TableMgr
     {
         dialogBox.setText("GData Table Manager");
         dialogBox.setAnimationEnabled(true);
-
-        VerticalPanel dialogVPanel = new VerticalPanel();
         
         dialogVPanel.add(new HTML("Item Value: "));
-        dialogVPanel.add(textToServerLabel);
-        dialogVPanel.add(separator);        
-        dialogVPanel.add(serverResponseLabel);
+        //dialogVPanel.add(textToServerLabel);
+        //dialogVPanel.add(separator);        
+        //dialogVPanel.add(serverResponseHtml);
         dialogVPanel.addStyleName("dialogVPanel");
-        dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+        dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
                 
         dialogBox.setSizePx(400,300);
         //dialogBox.setAlwaysShowScrollBars(true);
@@ -229,7 +235,7 @@ public class TableMgr
         sendButton.setEnabled(false);
         String textToServer = wordField.getText();
         textToServerLabel.setText(textToServer);
-        serverResponseLabel.setText("");
+        serverResponseHtml.setText("");
         HashMap<String, String> paramHash = mkSendParameters();
         if(paramHash==null)
             return;
@@ -242,12 +248,15 @@ public class TableMgr
                 public void onFailure(
                     Throwable caught)
                 {
+                    dialogVPanel.clear();
+                    dialogVPanel.add(serverResponseHtml);
+
                     // Show the RPC error message to the user
                     dialogBox
                         .setText("Remote Procedure Call - Failure");
-                    serverResponseLabel
+                    serverResponseHtml
                         .addStyleName("serverResponseLabelError");
-                    serverResponseLabel.setHTML(SERVER_ERROR);
+                    serverResponseHtml.setHTML(SERVER_ERROR);
                     dialogBox.center();
                     setSeprWid();
                 }
@@ -258,16 +267,47 @@ public class TableMgr
                     dialogBox.setText(
                         "GData Table Manager: " +
                         wordField.getText());
-                    serverResponseLabel
+                    serverResponseHtml
                         .removeStyleName("serverResponseLabelError");
-                    serverResponseLabel.setHTML(result);
+                    dialogVPanel.clear();
                     dialogBox.center();
                     setSeprWid();
+                    try
+                    {
+                        JSONValue resultjs = JSONParser.parse(result);
+                        System.out.println(resultjs);
+                        JSONArray entriesjs = resultjs.isArray();
+                        if (entriesjs != null)
+                        {
+                            LabelValuePair[] options = new LabelValuePair[entriesjs.size()];
+                            for (int i = 0; i < entriesjs.size(); i++)
+                            {
+                                JSONObject entryjs = entriesjs.get(i).isObject();
+                                JSONValue key = entryjs.get("key");
+                                JSONValue title = entryjs.get("title");
+                                if (key==null || key.toString().length()==0)
+                                    continue;
+                                    
+                                options[i] =
+                                    new LabelValuePair(title.toString(), key.toString());
+                            }
+                            
+                            // attach choice buttons to dialogVPanel, without default button
+                            // with radio group name = SelectSheet
+                            RadioButtonGroup selectSheet =
+                                new RadioButtonGroup(dialogVPanel, "SelectSheet", options, -1);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        dialogVPanel.add(serverResponseHtml);
+                        serverResponseHtml.setHTML(result);
+                    }
                 }
                 
                 private void setSeprWid()
                 {
-                    int seprWid = serverResponseLabel.getOffsetWidth()-250;
+                    int seprWid = serverResponseHtml.getOffsetWidth()-250;
                     if (seprWid<0)
                         seprWid = 1;
                     separator.setWidth(seprWid+"px");
@@ -355,4 +395,7 @@ public class TableMgr
         }
     }
     
+    public static native void alertSheetEntries()
+    /*-{$wnd.alert("sheetEntries:"+sheetEntries);
+     }-*/;
 }

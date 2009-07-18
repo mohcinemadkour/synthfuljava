@@ -1,6 +1,6 @@
 package org.synthful.gwt.widgets.client.ui;
 
-import org.synthful.gwt.widgets.client.ui.RadioButtonGroup.LabelValuePair;
+import org.synthful.gwt.widgets.client.ui.LabelValuePair;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RadioButton;
