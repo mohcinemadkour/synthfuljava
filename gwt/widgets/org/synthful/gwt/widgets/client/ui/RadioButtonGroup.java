@@ -83,7 +83,7 @@ public class RadioButtonGroup
     public RadioButton getSelected()
     {
         for (int i=0; i<Buttons.length; i++)
-            if (Buttons[i].getValue())
+            if (Buttons[i]!=null && Buttons[i].getValue())
                 return Buttons[i];
         
         if (defaultButton<0)
