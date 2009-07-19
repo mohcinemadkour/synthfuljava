@@ -8,6 +8,11 @@
  * KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+/*
+ * Modified by Blessed Geek as a patch to allow caption region to host a close
+ * button that is sensitive to mouse events.
+ * Modified 2009-07-09.
+ */
 package com.google.gwt.user.client.ui;
 
 import java.util.ArrayList;
