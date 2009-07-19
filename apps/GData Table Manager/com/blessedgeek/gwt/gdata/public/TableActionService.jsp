@@ -15,10 +15,8 @@ mrBean.action = TableMgr.getAction(action);
 String pg = mrBean.action.toString();
 switch (mrBean.action)
 {
-    case ListTables:
     case AddTable:
     case DeleteTable:
-    case SetTable:
     case AddRecord:
     case ListRecords:
     case DeleteRecord:
@@ -27,13 +25,16 @@ switch (mrBean.action)
         pg = mrBean.action.toString() + ".jspf";
         System.out.println("pg=" + pg);
         break;
+    case ListTables:
     case ListSheetDocs:
-        pg = mrBean.action.toString() + ".json.jspf";
+    case SetSheetDoc:
+    case SetTable:
+        pg = mrBean.action.toString() + ".jspf";
         System.out.println("pg=" + pg);
         pageContext.include( pg);
         return;
     default:
-        pageContext.include("Intro.jspf");
+        pageContext.include("About.jspf");
         return;
 }
 

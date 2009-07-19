@@ -5,29 +5,18 @@ extends="com.blessedgeek.gwt.gdata.server.TableMgrJspBeanable"
 import="
 java.util.List,
 com.google.gdata.data.spreadsheet.SpreadsheetEntry"
-%>
-<jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
-<table>
+%><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
+[{"message":"Select a document"}
 <%
 mrBean.SpreadsheetEntries =  mrBean.FeedsHdlr.listDocs(false);
-
-if (mrBean.SpreadsheetEntries.size() == 0)
-{
-    %>No Spreadsheet documents found<%
-}
-
 System.out.println("entries=" + mrBean.SpreadsheetEntries);
-int i=0;
+response.setContentType("text/json");
 for (SpreadsheetEntry entry : mrBean.SpreadsheetEntries)
 {
-    System.out.println("entry="+entry);
-    %>
-    <tr>
-    <td><%=++i %></td>
-    <td><a href="SetSheetDoc.jsp?sheetKey=<%=entry.getKey()%>"><%=entry.getTitle().getPlainText()%></a></td>
-    <td><%=entry.getSpreadsheetLink().getHref()%></td>    
-    </tr>
-    <%
+%>,{
+    "key":"<%=entry.getKey()%>",
+    "title":"<%=entry.getTitle().getPlainText()%>"
 }
-%>
-</table>
+<%
+}
+%>]

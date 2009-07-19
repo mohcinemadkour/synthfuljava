@@ -5,24 +5,18 @@ extends="com.blessedgeek.gwt.gdata.server.TableMgrJspBeanable"
 import="
 java.util.List,
 com.google.gdata.data.spreadsheet.TableEntry"
-%>
-<jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean"/>\
-<table>
+%><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean"
+/>[{"message":"Select a table"}
 <%
 List<TableEntry> entries =  mrBean.FeedsHdlr.listTables();
-
-if (entries.size() == 0)
-{
-    %>No tables found<%
-}
-
+System.out.println("entries=" + mrBean.SpreadsheetEntries);
+response.setContentType("text/json");
 for (TableEntry entry : entries)
 {
-    %>
-    <tr>
-    <td><%=entry%></td>
-    </tr>
-    <%
+%>,{
+    "table":"<%=entry.getId()%>",
+    "title":"<%=entry.getTitle().getPlainText()%>"
 }
-%>
-</table>
+<%
+}
+%>]

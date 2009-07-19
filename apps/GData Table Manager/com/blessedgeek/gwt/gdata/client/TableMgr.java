@@ -27,7 +27,9 @@ import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -62,13 +64,17 @@ public class TableMgr
 
     final Button sendButton = new Button("Send");
 
-    final TextBox wordField = new TextBox();
+    final Label currentDoc = new Label();
+    final Label _currentDoc = new Label();
+    final HorizontalPanel currentDocHPanel = new HorizontalPanel();
+    
+    final Label currentTable = new Label();
+    final Label _currentTable = new Label();
+    final HorizontalPanel currentTableHPanel = new HorizontalPanel();
 
     final ScrollableDialogBox dialogBox = new ScrollableDialogBox();
 
     final VerticalPanel dialogVPanel = new VerticalPanel();
-
-    final Label textToServerLabel = new Label();
 
     final HTML serverResponseHtml = new HTML();
 
@@ -79,8 +85,12 @@ public class TableMgr
     final HTML header = new HTML("<h3>Gdata Table Manager</h3>");
 
     final ChoiceRadios actions = new ChoiceRadios("Action");
+    
+    RadioButtonGroup dialogSelection;
 
     Object TriggerSendSource;
+    
+    Actions currentAction;
     
     final AuthFormPanel authform = new AuthFormPanel("_top");
     
@@ -94,19 +104,25 @@ public class TableMgr
      */
     public void onModuleLoad()
     {
-        wordField.setText("");
+        //currentDoc.setText("");
+        //_currentDoc.setText("");
         this.initPageHref();
 
         // We can add style names to widgets
         sendButton.addStyleName("sendButton");
         header.setStyleName("header");
+        this.currentDocHPanel.add(this._currentDoc);
+        this.currentDocHPanel.add(this.currentDoc);
+        this.currentTableHPanel.add(this._currentTable);
+        this.currentTableHPanel.add(this.currentTable);
 
         // Add the wordField and sendButton to the RootPanel
         // Use RootPanel.get() to get the entire body element
-        RootPanel.get("itemInput").add(wordField);
-        RootPanel.get("sendButtonContainer").add(sendButton);
-        RootPanel.get("header").add(header);
-        RootPanel.get("action").add(actions);
+        RootPanel.get("currentDoc").add(this.currentDocHPanel);
+        RootPanel.get("currentDoc").add(this.currentTableHPanel);
+        RootPanel.get("sendButtonContainer").add(this.sendButton);
+        RootPanel.get("header").add(this.header);
+        RootPanel.get("actions").add(this.actions);
         
         RootPanel logInOut = RootPanel.get("logIn");
         if (logInOut!=null)
@@ -126,15 +142,15 @@ public class TableMgr
         this.mkAuthParams();
 
         // Focus the cursor on the name field when the app loads
-        wordField.setFocus(true);
-        wordField.selectAll();
+        //currentDoc.setFocus(true);
+        //currentDoc.selectAll();
 
         this.furnishDialogBox();
 
         // Add a handler to send the name to the server
         SendButtonHandler sendhandler = new SendButtonHandler();
         this.sendButton.addClickHandler(sendhandler);
-        this.wordField.addKeyUpHandler(sendhandler);
+        //this.currentDoc.addKeyUpHandler(sendhandler);
         this.header.addClickHandler(sendhandler);
         this.logInOutButton.addClickHandler(new LogInOutButtonHandler());
         this.dialogBox.CloserEventHandlers.add(new CloserHandler());
@@ -181,14 +197,11 @@ public class TableMgr
                 groupName,
                     new LabelValuePair[]
                 {
-                    //new LabelValuePair("Log in", "" + Actions.LogIn),
                     new LabelValuePair("List Sheet Documents", "" + Actions.ListSheetDocs),
-                    new LabelValuePair("Set Sheet Document", "" + Actions.SetSheetDoc),
                     new LabelValuePair("List Tables", "" + Actions.ListTables),
                     new LabelValuePair("Set Table", "" + Actions.SetTable),
                     new LabelValuePair("Search for Record", "" + Actions.Search4Record),
                     new LabelValuePair("Query for Record", "" + Actions.Query4Record),
-                    //new LabelValuePair("Log out", "" + Actions.LogOut)
                 },
                 0
             );
@@ -213,15 +226,25 @@ public class TableMgr
         HashMap<String, String> parameters =
             new HashMap<String, String>();
         
-        if(TriggerSendSource==sendButton || TriggerSendSource==wordField)
+        if(this.TriggerSendSource==this.sendButton)
         {
-            String selectedAction = this.actions.getSelected().getFormValue();            
+            String selectedAction = this.actions.getSelected().getFormValue();
             parameters.put("action", selectedAction);
-            parameters.put("item", wordField.getText());
+            //parameters.put("item", this.currentDoc.getText());
+            this.currentAction = TableMgr.getAction(selectedAction);
+            this.sendButton.setEnabled(false);
         }
-        else if(TriggerSendSource==header)
+        else if(this.TriggerSendSource==header)
         {
-            parameters.put("action", ""+Actions.Intro);
+            parameters.put("action", ""+Actions.About);
+            this.sendButton.setEnabled(false);
+        }
+        
+        else if (this.currentAction==Actions.SetSheetDoc)
+        {
+            String dialogSelectedSheet = this.dialogSelection.getSelected().getFormValue();
+            parameters.put("action", Actions.SetSheetDoc.toString());
+            parameters.put("sheetKey", dialogSelectedSheet);           
         }
         
         return parameters;
@@ -230,11 +253,8 @@ public class TableMgr
     /**
      * Send the name from the wordField to the server and wait for a response.
      */
-    private void sendWordToServer()
+    private void sendToServer()
     {
-        sendButton.setEnabled(false);
-        String textToServer = wordField.getText();
-        textToServerLabel.setText(textToServer);
         serverResponseHtml.setText("");
         HashMap<String, String> paramHash = mkSendParameters();
         if(paramHash==null)
@@ -258,7 +278,7 @@ public class TableMgr
                         .addStyleName("serverResponseLabelError");
                     serverResponseHtml.setHTML(SERVER_ERROR);
                     dialogBox.center();
-                    setSeprWid();
+                    //setSeprWid();
                 }
 
                 public void onSuccess(
@@ -266,42 +286,32 @@ public class TableMgr
                 {
                     dialogBox.setText(
                         "GData Table Manager: " +
-                        wordField.getText());
+                        currentDoc.getText());
                     serverResponseHtml
                         .removeStyleName("serverResponseLabelError");
                     dialogVPanel.clear();
-                    dialogBox.center();
-                    setSeprWid();
-                    try
+                    // setSeprWid();
+                    
+                    switch (currentAction)
                     {
-                        JSONValue resultjs = JSONParser.parse(result);
-                        System.out.println(resultjs);
-                        JSONArray entriesjs = resultjs.isArray();
-                        if (entriesjs != null)
-                        {
-                            LabelValuePair[] options = new LabelValuePair[entriesjs.size()];
-                            for (int i = 0; i < entriesjs.size(); i++)
-                            {
-                                JSONObject entryjs = entriesjs.get(i).isObject();
-                                JSONValue key = entryjs.get("key");
-                                JSONValue title = entryjs.get("title");
-                                if (key==null || key.toString().length()==0)
-                                    continue;
-                                    
-                                options[i] =
-                                    new LabelValuePair(title.toString(), key.toString());
-                            }
-                            
-                            // attach choice buttons to dialogVPanel, without default button
-                            // with radio group name = SelectSheet
-                            RadioButtonGroup selectSheet =
-                                new RadioButtonGroup(dialogVPanel, "SelectSheet", options, -1);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        dialogVPanel.add(serverResponseHtml);
-                        serverResponseHtml.setHTML(result);
+                        case ListSheetDocs:
+                            listDialogSelection(result, "key", "title");
+                            dialogBox.setText("Select Document");
+                            dialogBox.center();
+                            break;
+                        case ListTables:
+                            listDialogSelection(result, "table", "title");
+                            dialogBox.setText("Select Table");
+                            dialogBox.center();
+                            break;
+                        case SetSheetDoc:
+                        case SetTable:
+                            break;
+
+                        default:
+                            dialogBox.center();
+                            dialogBox.setText(currentAction.toString());
+                            break;
                     }
                 }
                 
@@ -312,9 +322,52 @@ public class TableMgr
                         seprWid = 1;
                     separator.setWidth(seprWid+"px");
                 }
+                
+                void listDialogSelection(String result, String hashkey1, String hashkey2)
+                {
+                    try
+                    {
+                        JSONValue resultjs = JSONParser.parse(result);
+                        System.out.println(resultjs);
+                        JSONArray entriesjs = resultjs.isArray();
+                        if (entriesjs != null)
+                        {
+                            JSONObject entryjs = entriesjs.get(0).isObject();
+                            JSONValue dialogMsg = entryjs.get("message");
+                            dialogBox.setText(dialogMsg.toString());
+                            
+                            LabelValuePair[] options = new LabelValuePair[entriesjs.size()];
+                            options[0] =
+                                new LabelValuePair("None", "");
+                            
+                            for (int i = 1; i < entriesjs.size(); i++)
+                            {
+                                entryjs = entriesjs.get(i).isObject();
+                                JSONValue key = entryjs.get(hashkey1);
+                                JSONValue title = entryjs.get(hashkey2);
+                                if (key==null || key.toString().length()==0)
+                                    continue;
+                                    
+                                options[i] =
+                                    new LabelValuePair(title.toString(), key.toString());
+                            }
+                            
+                            // attach choice buttons to dialogVPanel, without default button
+                            // with radio group name = SelectSheet
+                            dialogSelection =
+                                new RadioButtonGroup(dialogVPanel, "SelectSheet", options, 0);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        dialogVPanel.add(serverResponseHtml);
+                        serverResponseHtml.setHTML(result);
+                    }        
+                }
+            
             });
     }
-
+    
     class SendButtonHandler
         implements ClickHandler, KeyUpHandler
     {
@@ -325,7 +378,7 @@ public class TableMgr
             ClickEvent event)
         {
             TriggerSendSource = event.getSource();
-            sendWordToServer();
+            sendToServer();
         }
 
         /**
@@ -337,7 +390,7 @@ public class TableMgr
             if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
             {
                 TriggerSendSource = event.getSource();
-                sendWordToServer();
+                sendToServer();
             }
         }
     }
@@ -360,9 +413,44 @@ public class TableMgr
     implements CloserEventHandler
     {
 
-        public void onClick(Event event)
+        public void onClick(
+            Event event)
         {
+            TriggerSendSource = event.getEventTarget();
             sendButton.setEnabled(true);
+            
+            if (dialogSelection==null)
+                return;
+            System.out.println("dialogSelectedRadio="
+                + dialogSelection.getSelected());
+            RadioButton selected =
+                dialogSelection.getSelected();
+            if (selected==null)
+                return;
+            String selectedTxt = selected.getText();
+            if (selectedTxt == null || selectedTxt.length() == 0)
+                return;
+
+            switch (currentAction)
+            {
+                case ListSheetDocs:
+                    _currentDoc.setText("Current Doc:");
+                    currentDoc.setText(selectedTxt);
+                    _currentTable.setText("");
+                    currentTable.setText("");
+                    currentAction = Actions.SetSheetDoc;
+                    sendToServer();
+                    break;
+                    
+                case ListTables:
+                    _currentTable.setText("current Table:");
+                    currentTable.setText(selectedTxt);
+                    currentAction = Actions.SetTable;
+                    sendToServer();
+                    break;
+                    
+
+            }
         }
 
         public void onMouseOver(Event event)
@@ -377,7 +465,7 @@ public class TableMgr
     
     static public enum Actions
     {
-        NONE, LogIn, LogOut, Intro,
+        NONE, LogIn, LogOut, About,
         ListSheetDocs, SetSheetDoc,
         ListTables, SetTable, AddTable, DeleteTable,
         ListRecords, AddRecord, DeleteRecord,

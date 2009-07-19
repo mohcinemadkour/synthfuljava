@@ -39,14 +39,14 @@ MrBean.logTokenInfo(mrBean.SessionAuthToken, null);
         <td id="<%=logIn%>"></td>        
       </tr>
       <tr>
-        <td colspan="2" style="font-weight:bold;">Enter item:</td>        
+        <td height="30px" id="currentDoc"></td>
       </tr>
+      <tr><td height="20px">&nbsp;</td></tr>
       <tr>
-        <td id="itemInput"></td>
         <td id="sendButtonContainer"></td>
       </tr>
       <tr>
-        <td id="action"></td>
+        <td id="actions"></td>
       </tr>
     </table>
     <div id="authform"/>
