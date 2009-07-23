@@ -38,10 +38,12 @@ MrBean.logTokenInfo(mrBean.SessionAuthToken, null);
       <tr>
         <td id="<%=logIn%>"></td>        
       </tr>
+      <tr><td><hr/></td></tr>
       <tr>
         <td height="30px" id="currentDoc"></td>
       </tr>
       <tr><td height="20px">&nbsp;</td></tr>
+      <tr><td><hr/></td></tr>
       <tr>
         <td id="sendButtonContainer"></td>
       </tr>
@@ -50,5 +52,8 @@ MrBean.logTokenInfo(mrBean.SessionAuthToken, null);
       </tr>
     </table>
     <div id="authform"/>
+    <p/>
+    <hr/>
+    <div><a href="https://www.google.com/accounts/IssuedAuthSubTokens" style="font-size:10; ">Revoke Tokens</a></div>
   </body>
 </html>

@@ -1,6 +1,5 @@
 package org.synthful.gdata;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -9,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.synthful.gwt.gdata.client.FeedsBaseUrl;
+import org.synthful.util.HashVector;
 
 import com.google.common.collect.Maps;
 import com.google.gdata.client.spreadsheet.RecordQuery;
@@ -24,7 +24,6 @@ import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import com.google.gdata.data.spreadsheet.TableEntry;
 import com.google.gdata.data.spreadsheet.TableFeed;
 import com.google.gdata.data.spreadsheet.Worksheet;
-import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
 // TODO: Auto-generated Javadoc
@@ -101,6 +100,8 @@ public class SpreadsheetFeedsHandler
         
         return this.Spreadsheets;
     }
+        
+    
     /**
      * Sets the sheet urls.
      * 
@@ -152,6 +153,51 @@ public class SpreadsheetFeedsHandler
         return feed.getEntries();
     }
 
+    /**
+     * Lists the tables currently available in the sheet.
+     * 
+     * @return HashMap<table title String, TableEntry>
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ServiceException the service exception
+     */
+    public HashMap<String, TableEntry> listTables(HashMap<String, TableEntry> nullObj)
+        throws IOException, ServiceException
+    {
+        nullObj = new HashMap<String, TableEntry>();
+        TableFeed feed = this.Service.getFeed(this.TablesFeedUrl, TableFeed.class);
+        List<TableEntry> entries = feed.getEntries();
+        nullObj = new  HashMap<String, TableEntry>(entries.size());
+        for(TableEntry entry: entries)
+        {
+            nullObj.put(entry.getTitle().getPlainText(), entry);
+        }
+        return nullObj;
+    }
+    
+    /**
+     * Lists the tables currently available in the sheet.
+     * 
+     * @return HashVector<table title String, TableEntry>
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ServiceException the service exception
+     */
+    public HashVector<String, TableEntry> listTables(HashVector<String, TableEntry> nullObj)
+        throws IOException, ServiceException
+    {
+        nullObj = new HashVector<String, TableEntry>();
+        TableFeed feed = this.Service.getFeed(this.TablesFeedUrl, TableFeed.class);
+        List<TableEntry> entries = feed.getEntries();
+        nullObj = new  HashVector<String, TableEntry>(entries.size());
+        for(TableEntry entry: entries)
+        {
+            nullObj.put(entry.getTitle().getPlainText(), entry);
+        }
+        return nullObj;
+    }
+    
+    
     /**
      * Adds a new table entry, based on the user-specified name value pairs.
      * Note that the following parameters must be specified:
@@ -341,7 +387,7 @@ public class SpreadsheetFeedsHandler
      * @throws IOException when an error occurs in communication with the Google
      * Spreadsheets service.
      */
-    public List<RecordEntry> listAllEntries()
+    public List<RecordEntry> listAllRecordEntries()
         throws IOException, ServiceException
     {
         RecordFeed feed = this.Service.getFeed(this.TableRecordsFeedUrl, RecordFeed.class);

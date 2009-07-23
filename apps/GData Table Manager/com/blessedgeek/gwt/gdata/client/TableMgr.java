@@ -2,7 +2,6 @@ package com.blessedgeek.gwt.gdata.client;
 
 import java.util.HashMap;
 
-import org.synthful.gwt.domElements.client.DomUtils;
 import org.synthful.gwt.gdata.client.FeedsBaseUrl;
 import org.synthful.gwt.widgets.client.ui.AuthFormPanel;
 import org.synthful.gwt.widgets.client.ui.LabelValuePair;
@@ -33,6 +32,7 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 /**
  * @author Icecream
  *
@@ -72,25 +72,17 @@ public class TableMgr
     final Label _currentTable = new Label();
     final HorizontalPanel currentTableHPanel = new HorizontalPanel();
 
-    final ScrollableDialogBox dialogBox = new ScrollableDialogBox();
-
-    final VerticalPanel dialogVPanel = new VerticalPanel();
-
-    final HTML serverResponseHtml = new HTML();
-
-    final Label separator = new Label();
-
     final Button logInOutButton = new Button();
 
     final HTML header = new HTML("<h3>Gdata Table Manager</h3>");
 
     final ChoiceRadios actions = new ChoiceRadios("Action");
     
-    RadioButtonGroup dialogSelection;
-
     Object TriggerSendSource;
     
     Actions currentAction;
+    String currentDocKey;
+    String currentTableId;
     
     final AuthFormPanel authform = new AuthFormPanel("_top");
     
@@ -98,6 +90,8 @@ public class TableMgr
     String pageBaseHref;
     String logInOutUrl;
 
+    final SendButtonHandler sendhandler = new SendButtonHandler();
+    final TableMgrDialog dialogBox = new TableMgrDialog();
 
     /**
      * This is the entry point method.
@@ -109,8 +103,8 @@ public class TableMgr
         this.initPageHref();
 
         // We can add style names to widgets
-        sendButton.addStyleName("sendButton");
-        header.setStyleName("header");
+        this.sendButton.addStyleName("sendButton");
+        this.header.setStyleName("header");
         this.currentDocHPanel.add(this._currentDoc);
         this.currentDocHPanel.add(this.currentDoc);
         this.currentTableHPanel.add(this._currentTable);
@@ -141,19 +135,11 @@ public class TableMgr
         
         this.mkAuthParams();
 
-        // Focus the cursor on the name field when the app loads
-        //currentDoc.setFocus(true);
-        //currentDoc.selectAll();
-
-        this.furnishDialogBox();
 
         // Add a handler to send the name to the server
-        SendButtonHandler sendhandler = new SendButtonHandler();
         this.sendButton.addClickHandler(sendhandler);
-        //this.currentDoc.addKeyUpHandler(sendhandler);
         this.header.addClickHandler(sendhandler);
         this.logInOutButton.addClickHandler(new LogInOutButtonHandler());
-        this.dialogBox.CloserEventHandlers.add(new CloserHandler());
     }
     
     private void initPageHref()
@@ -169,23 +155,6 @@ public class TableMgr
         System.out.println(this.pageBaseHref);
     }
     
-    private void furnishDialogBox()
-    {
-        dialogBox.setText("GData Table Manager");
-        dialogBox.setAnimationEnabled(true);
-        
-        dialogVPanel.add(new HTML("Item Value: "));
-        //dialogVPanel.add(textToServerLabel);
-        //dialogVPanel.add(separator);        
-        //dialogVPanel.add(serverResponseHtml);
-        dialogVPanel.addStyleName("dialogVPanel");
-        dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
-                
-        dialogBox.setSizePx(400,300);
-        //dialogBox.setAlwaysShowScrollBars(true);
-        
-        dialogBox.setWidget(dialogVPanel);
-    }
 
     class ChoiceRadios
         extends VerticalRadioButtonGroup
@@ -199,9 +168,10 @@ public class TableMgr
                 {
                     new LabelValuePair("List Sheet Documents", "" + Actions.ListSheetDocs),
                     new LabelValuePair("List Tables", "" + Actions.ListTables),
-                    new LabelValuePair("Set Table", "" + Actions.SetTable),
-                    new LabelValuePair("Search for Record", "" + Actions.Search4Record),
-                    new LabelValuePair("Query for Record", "" + Actions.Query4Record),
+                    new LabelValuePair("List Table Info", "" + Actions.ListTableInfo),
+                    new LabelValuePair("List Table Records", "" + Actions.ListTableRecords),
+                    new LabelValuePair("Search for Record", "" + Actions.ShowSearch4Record),
+                    new LabelValuePair("Query for Record", "" + Actions.ShowQuery4Record),
                 },
                 0
             );
@@ -221,11 +191,13 @@ public class TableMgr
     }
 
     
-    private HashMap<String, String> mkSendParameters()
+    private HashMap<String, String> mkSendParameters(Actions action)
     {
         HashMap<String, String> parameters =
             new HashMap<String, String>();
         
+        // The following is triggered from main window choices/send button
+        // this.currentAction is to be determined
         if(this.TriggerSendSource==this.sendButton)
         {
             String selectedAction = this.actions.getSelected().getFormValue();
@@ -234,18 +206,48 @@ public class TableMgr
             this.currentAction = TableMgr.getAction(selectedAction);
             this.sendButton.setEnabled(false);
         }
+        
+        // this.currentAction will be set to Actions.About
         else if(this.TriggerSendSource==header)
         {
-            parameters.put("action", ""+Actions.About);
+            parameters.put("action", Actions.About.toString());
+            this.currentAction = Actions.About;
             this.sendButton.setEnabled(false);
         }
         
-        else if (this.currentAction==Actions.SetSheetDoc)
+        else if (TriggerSendSource==dialogBox.Submit)
         {
-            String dialogSelectedSheet = this.dialogSelection.getSelected().getFormValue();
-            parameters.put("action", Actions.SetSheetDoc.toString());
-            parameters.put("sheetKey", dialogSelectedSheet);           
+            parameters.put("action", this.currentAction.toString());
+            switch (this.currentAction)
+            {
+                case Search4Record:
+                    parameters.put("search", this.dialogBox.QueryBox.getText());
+                    break;
+
+                case Query4Record:
+                    parameters.put("query", this.dialogBox.QueryBox.getText());
+                    break;
+            }
         }
+        // the following is triggered from DialogBox close button.
+        // this.actions.getSelected() cannot be used because dialogbox
+        // close button onclick handler resets it to 0.
+        // this.currentAction will be set to Actions.SetSheetDoc.
+        else
+        {
+            this.currentAction = action;
+            parameters.put("action", this.currentAction.toString());
+            switch (this.currentAction)
+            {
+                case SetSheetDoc:
+                    parameters.put("sheetKey", this.currentDocKey); 
+                    break;
+                case SetTable:
+                    parameters.put("table", this.currentTableId); 
+                    break;
+            }
+        }
+        
         
         return parameters;
     }
@@ -253,10 +255,25 @@ public class TableMgr
     /**
      * Send the name from the wordField to the server and wait for a response.
      */
-    private void sendToServer()
+    private void sendToServer(Actions action)
     {
-        serverResponseHtml.setText("");
-        HashMap<String, String> paramHash = mkSendParameters();
+        HashMap<String, String> paramHash = mkSendParameters(action);
+        
+        //for these cases, don't send to server, just display the dialogbox
+        if(this.currentAction==Actions.ShowSearch4Record)
+        {
+            dialogBox.showQueryWidgets("Enter literal to search<p/>");
+            currentAction = Actions.Search4Record;
+            return;
+        }
+        if(this.currentAction==Actions.ShowQuery4Record)
+        {
+            dialogBox.showQueryWidgets(
+                "Enter query string using format<br/>{col-name}[=|&lt;|>]\"{literal string}\"<br/>[and|or] ...<p/>");
+            currentAction = Actions.Query4Record;
+            return;
+        }
+        
         if(paramHash==null)
             return;
         
@@ -268,29 +285,19 @@ public class TableMgr
                 public void onFailure(
                     Throwable caught)
                 {
-                    dialogVPanel.clear();
-                    dialogVPanel.add(serverResponseHtml);
-
                     // Show the RPC error message to the user
                     dialogBox
                         .setText("Remote Procedure Call - Failure");
-                    serverResponseHtml
-                        .addStyleName("serverResponseLabelError");
-                    serverResponseHtml.setHTML(SERVER_ERROR);
-                    dialogBox.center();
-                    //setSeprWid();
+                    dialogBox.showRpcFailureHtml();
                 }
 
                 public void onSuccess(
                     String result)
                 {
-                    dialogBox.setText(
-                        "GData Table Manager: " +
-                        currentDoc.getText());
-                    serverResponseHtml
-                        .removeStyleName("serverResponseLabelError");
-                    dialogVPanel.clear();
-                    // setSeprWid();
+                    if (currentAction!=null)
+                        dialogBox.setText(currentAction.toString());
+                    else
+                        dialogBox.setText("GData Table Manager");
                     
                     switch (currentAction)
                     {
@@ -300,29 +307,20 @@ public class TableMgr
                             dialogBox.center();
                             break;
                         case ListTables:
-                            listDialogSelection(result, "table", "title");
+                            listDialogSelection(result, "title", "title");
                             dialogBox.setText("Select Table");
                             dialogBox.center();
                             break;
                         case SetSheetDoc:
                         case SetTable:
                             break;
-
+                            
                         default:
-                            dialogBox.center();
-                            dialogBox.setText(currentAction.toString());
+                            dialogBox.showRpcHtml(result);
                             break;
                     }
                 }
-                
-                private void setSeprWid()
-                {
-                    int seprWid = serverResponseHtml.getOffsetWidth()-250;
-                    if (seprWid<0)
-                        seprWid = 1;
-                    separator.setWidth(seprWid+"px");
-                }
-                
+                                
                 void listDialogSelection(String result, String hashkey1, String hashkey2)
                 {
                     try
@@ -349,23 +347,108 @@ public class TableMgr
                                     continue;
                                     
                                 options[i] =
-                                    new LabelValuePair(title.toString(), key.toString());
+                                    new LabelValuePair(
+                                        title.isString().stringValue(),
+                                        key.isString().stringValue());
                             }
                             
                             // attach choice buttons to dialogVPanel, without default button
                             // with radio group name = SelectSheet
-                            dialogSelection =
-                                new RadioButtonGroup(dialogVPanel, "SelectSheet", options, 0);
+                            dialogBox.clear();
+                            dialogBox.Selection =
+                                new RadioButtonGroup(dialogBox.VPanel, "SelectSheet", options, 0);
+                            dialogBox.center();
                         }
                     }
                     catch (Exception e)
                     {
-                        dialogVPanel.add(serverResponseHtml);
-                        serverResponseHtml.setHTML(result);
+                        dialogBox.showRpcHtml(result);
                     }        
                 }
+                
             
             });
+    }
+    
+    class TableMgrDialog
+    extends ScrollableDialogBox
+    {
+        public TableMgrDialog()
+        {
+            this.setText("GData Table Manager");
+            this.setAnimationEnabled(true);
+            
+            VPanel.addStyleName("dialogVPanel");
+            VPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
+                    
+            this.setSizePx(400,300);            
+            this.setWidget(VPanel);
+            
+            this.QueryBox.setTextAlignment(TextBox.ALIGN_LEFT);
+            
+            this.CloserEventHandlers.add(new CloserHandler());
+            
+            this.Submit.setHTML("Send");
+            this.Submit.addClickHandler(sendhandler);
+        }
+        
+        @Override
+        final public void add(Widget w)
+        {
+            this.VPanel.add(w);
+        }
+        
+        @Override
+        final public boolean remove(Widget w)
+        {
+            return this.VPanel.remove(w);
+        }
+        
+        @Override
+        final public void clear()
+        {
+            this.VPanel.clear();
+        }
+        
+        final public void showQueryWidgets(String instructions)
+        {
+            this.clear();
+            this.htmlContent.setHTML(instructions);
+            this.add(this.htmlContent);
+            this.add(this.QueryBox);
+            this.add(this.Submit);
+            this.QueryBox.setText("");
+            this.center();
+        }
+        
+        final void showHtml(String text)
+        {
+            this.clear();
+            this.add(htmlContent);
+            this.htmlContent.setHTML(text);
+            this.center();
+        }
+        
+        final public void showRpcHtml(String text)
+        {
+            this.htmlContent.removeStyleName("serverResponseLabelError");
+            this.showHtml(text);
+        }
+        
+        final public void showRpcFailureHtml()
+        {
+            this.htmlContent.addStyleName("serverResponseLabelError");
+            this.showHtml(SERVER_ERROR);
+        }
+        
+        final public VerticalPanel VPanel = new VerticalPanel();
+        
+        public RadioButtonGroup Selection;
+
+        final public TextBox QueryBox = new TextBox();
+        final public Button Submit = new Button();
+        
+        final HTML htmlContent = new HTML();
     }
     
     class SendButtonHandler
@@ -378,7 +461,8 @@ public class TableMgr
             ClickEvent event)
         {
             TriggerSendSource = event.getSource();
-            sendToServer();
+            dialogBox.hide();
+            sendToServer(null);
         }
 
         /**
@@ -390,7 +474,7 @@ public class TableMgr
             if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
             {
                 TriggerSendSource = event.getSource();
-                sendToServer();
+                sendToServer(null);
             }
         }
     }
@@ -419,15 +503,20 @@ public class TableMgr
             TriggerSendSource = event.getEventTarget();
             sendButton.setEnabled(true);
             
-            if (dialogSelection==null)
+            if (dialogBox.Selection==null)
                 return;
             System.out.println("dialogSelectedRadio="
-                + dialogSelection.getSelected());
+                + dialogBox.Selection.getSelected());
             RadioButton selected =
-                dialogSelection.getSelected();
+                dialogBox.Selection.getSelected();
             if (selected==null)
                 return;
             String selectedTxt = selected.getText();
+            String selectedValue = selected.getFormValue();
+            
+            // reset to 0 so that stale state would not propagate
+            // thro a failure in any subsequent step,
+            dialogBox.Selection.Buttons[0].setValue(true); 
             if (selectedTxt == null || selectedTxt.length() == 0)
                 return;
 
@@ -436,17 +525,18 @@ public class TableMgr
                 case ListSheetDocs:
                     _currentDoc.setText("Current Doc:");
                     currentDoc.setText(selectedTxt);
+                    currentDocKey = selectedValue;
                     _currentTable.setText("");
                     currentTable.setText("");
-                    currentAction = Actions.SetSheetDoc;
-                    sendToServer();
+                    currentTableId = null;
+                    sendToServer(Actions.SetSheetDoc);
                     break;
                     
                 case ListTables:
                     _currentTable.setText("current Table:");
                     currentTable.setText(selectedTxt);
-                    currentAction = Actions.SetTable;
-                    sendToServer();
+                    currentTableId = selectedValue;
+                    sendToServer(Actions.SetTable);
                     break;
                     
 
@@ -467,9 +557,12 @@ public class TableMgr
     {
         NONE, LogIn, LogOut, About,
         ListSheetDocs, SetSheetDoc,
-        ListTables, SetTable, AddTable, DeleteTable,
-        ListRecords, AddRecord, DeleteRecord,
-        Search4Record, Query4Record
+        ListTables, SetTable,
+        AddTable, DeleteTable,
+        ListTableInfo, ListTableRecords,
+        AddRecord, DeleteRecord,
+        ShowSearch4Record, Search4Record,
+        ShowQuery4Record, Query4Record
     };
     
     static public TableMgr.Actions getAction(String actionStr)
