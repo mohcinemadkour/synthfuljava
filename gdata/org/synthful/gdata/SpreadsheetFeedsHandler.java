@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.synthful.gwt.gdata.client.FeedsBaseUrl;
 import org.synthful.util.HashVector;
@@ -24,6 +25,8 @@ import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import com.google.gdata.data.spreadsheet.TableEntry;
 import com.google.gdata.data.spreadsheet.TableFeed;
 import com.google.gdata.data.spreadsheet.Worksheet;
+import com.google.gdata.data.spreadsheet.WorksheetEntry;
+import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.util.ServiceException;
 
 // TODO: Auto-generated Javadoc
@@ -83,6 +86,14 @@ public class SpreadsheetFeedsHandler
         }
     }
         
+    public URL getWorksheetFeed(String spreadsheetKey)
+    {
+        SpreadsheetEntry sentry =
+            this.SpreadsheetMappedEntries.get(spreadsheetKey);
+        return
+            sentry.getWorksheetFeedUrl();
+    }
+
     public List<SpreadsheetEntry> listDocs(boolean refresh)
     throws IOException, ServiceException
     {
@@ -117,6 +128,7 @@ public class SpreadsheetFeedsHandler
         this.SheetFeedUrlStr = FeedsBaseUrl.SpreadSheets + sheetKey;            
         this.TablesFeedUrl = new URL(this.SheetFeedUrlStr + "/tables/");            
         this.RecordsFeedUrl = new URL(this.SheetFeedUrlStr + "/records/");        
+        this.WorkSheetsFeedUrl = this.getWorksheetFeed(sheetKey);
     }
 
     /**
@@ -259,123 +271,19 @@ public class SpreadsheetFeedsHandler
             String param = parts[0].trim();
             String value = parts[1].trim();
 
-            if (param.equals("title"))
-            {
-                entryToUpdate.setTitle(new PlainTextConstruct(value));
-            }
-            else if (param.equals("summary"))
-            {
-                entryToUpdate.setSummary(new PlainTextConstruct(value));
-            }
-            else if (param.equals("worksheet"))
-            {
-                entryToUpdate.setWorksheet(new Worksheet(value));
-            }
-            else if (param.equals("header"))
-            {
-                entryToUpdate.setHeader(new Header(Integer.parseInt(value)));
-            }
-            else if (param.equals("startrow") || param.equals("insertionmode")
-                || param.equals("numrows"))
-            {
-                dataParams.put(param, value);
-            }
-            else if (param.equals("columns"))
-            {
-                String[] columns = value.split(";");
-                for (int i = 0; i < columns.length; i++)
-                {
-                    String[] colInfo = columns[i].split(":");
-                    if (colInfo.length < 2)
-                    {
-                        System.out
-                            .println("Columns are specified as column:value, for "
-                                + " example, B:UpdatedPhone");
-                    }
-                    String index = colInfo[0];
-                    String name = colInfo[1];
-                    dataCols.put(index, name);
-                }
-            }
+            setTableEntryValues(
+                entryToUpdate, dataParams, dataCols,
+                param, value);
         }
 
         // Update table data.
         Data data =
-            getDataFromParams(entryToUpdate.getData(), dataParams, dataCols);
+            dataFromParams(entryToUpdate.getData(), dataParams, dataCols);
         entryToUpdate.setData(data);
 
         return entryToUpdate;
     }
 
-    /**
-     * Create a new data object from any data params that were specified.
-     * Data params are numrows, startrow, insertionmode and columns.
-     * Any attributes that are not specified are left alone.  So, if data already
-     * has insertionmode=insert, specifying numrows=4 and startrow=12 will leave
-     * insertionmode as insert.
-     * 
-     * @param data original data object.
-     * @param dataParams new data params to use to update the original
-     * data object.
-     * @param columnMap map of column index to value used to update the column
-     * headers of the table.
-     * 
-     * @return the data from params
-     */
-    private Data getDataFromParams(
-        Data data, Map<String, String> dataParams, Map<String, String> columnMap)
-    {
-        Data newData = new Data();
-        if (data == null)
-        {
-            data = new Data();
-        }
-
-        if (dataParams.get("numrows") != null)
-        {
-            newData
-                .setNumberOfRows(Integer.parseInt(dataParams.get("numrows")));
-        }
-        else
-        {
-            newData.setNumberOfRows(data.getNumberOfRows());
-        }
-
-        if (dataParams.get("startrow") != null)
-        {
-            newData.setStartIndex(Integer.parseInt(dataParams.get("startrow")));
-        }
-        else
-        {
-            newData.setStartIndex(data.getStartIndex());
-        }
-
-        String insertionMode = dataParams.get("insertionmode");
-        if (insertionMode != null && insertionMode.equals("insert"))
-        {
-            newData.setInsertionMode(Data.InsertionMode.INSERT);
-        }
-
-        List<Column> existing = data.getColumns();
-        // Add existing column data to column map.
-        for (Column existingCol : existing)
-        {
-            String index = existingCol.getIndex();
-            String name = existingCol.getName();
-            // If column is being updated, set value, else add a new one.
-            if (columnMap.get(index) == null)
-            {
-                columnMap.put(index, name);
-            }
-        }
-
-        // Set columns on new data object.
-        for (String key : columnMap.keySet())
-        {
-            newData.addColumn(new Column(key, columnMap.get(key)));
-        }
-        return newData;
-    }
 
     /**
      * Lists all rows in the spreadsheet.
@@ -441,6 +349,196 @@ public class SpreadsheetFeedsHandler
         return feed.getEntries();
     }
 
+    public void addWorksheet(
+        String title, String rowCount, String colCount)
+        throws IOException, ServiceException
+    {
+        try {
+            this.addWorksheet(title, Integer.parseInt(rowCount), Integer.parseInt(colCount));
+        }
+        catch(NumberFormatException e)
+        {
+            this.addWorksheet(title, 2, 2);
+        }
+    }
+    
+    public void addWorksheet(
+        String title, int rowCount, int colCount)
+        throws IOException, ServiceException
+    {
+        WorksheetEntry newWorksheet = new WorksheetEntry();
+        newWorksheet.setTitle(new PlainTextConstruct(title));
+        newWorksheet.setRowCount(rowCount);
+        newWorksheet.setColCount(colCount);
+        this.Service.insert(this.WorkSheetsFeedUrl, newWorksheet);
+    }
+    
+    public void addNewTableEntry(
+        Map<String, String> params)
+        throws IOException, ServiceException
+    {
+        TableEntry newEntry =
+            entryContentsFromParams(new TableEntry(), params);
+        this.Service.insert(this.TablesFeedUrl, newEntry);
+    }
+
+    public TableEntry entryContentsFromParams(
+        TableEntry entryToUpdate, Map<String, String> params)
+    {
+        Map<String, String> dataParams = Maps.newHashMap();
+        Map<String, String> dataCols = Maps.newHashMap();
+
+        for (Entry<String, String> entry : params.entrySet())
+        {
+            String tag = entry.getKey();
+            String value = entry.getValue();
+            setTableEntryValues(
+                entryToUpdate, dataParams, dataCols,
+                tag, value);
+        }
+
+        // Update table data.
+        Data data =
+            dataFromParams(entryToUpdate.getData(), dataParams, dataCols);
+        entryToUpdate.setData(data);
+
+        return entryToUpdate;
+    }
+    
+    static private void setTableEntryValues(
+        TableEntry entryToUpdate,
+        Map<String, String> dataParams,
+        Map<String, String> dataCols,
+        String tag, String value)
+    {
+        if (tag.equals("title"))
+        {
+            entryToUpdate.setTitle(new PlainTextConstruct(value));
+        }
+        else if (tag.equals("summary"))
+        {
+            entryToUpdate.setSummary(new PlainTextConstruct(value));
+        }
+        else if (tag.equals("worksheet"))
+        {
+            entryToUpdate.setWorksheet(new Worksheet(value));
+        }
+        else if (tag.equals("header"))
+        {
+            entryToUpdate.setHeader(new Header(Integer.parseInt(value)));
+        }
+        else if (tag.equals("startRow") || tag.equals("insertionMode")
+            || tag.equals("numRows"))
+        {
+            dataParams.put(tag, value);
+        }
+        else if (tag.equals("columns"))
+        {
+            String[] columns = value.split(";");
+            for (int i = 0; i < columns.length; i++)
+            {
+                String[] colInfo = columns[i].split(":");
+                if (colInfo.length < 2)
+                {
+                    System.out
+                        .println(COLUMN_ENTRY_INSTR);
+                }
+                String index = colInfo[0];
+                String name = colInfo[1];
+                dataCols.put(index, name);
+            }
+        }
+    }
+
+    /**
+     * Create a new data object from any data params that were specified.
+     * Data params are numrows, startrow, insertionmode and columns.
+     * Any attributes that are not specified are left alone.  So, if data already
+     * has insertionmode=insert, specifying numrows=4 and startrow=12 will leave
+     * insertionmode as insert.
+     * 
+     * @param data original data object.
+     * @param dataParams new data params to use to update the original
+     * data object.
+     * @param columnMap map of column index to value used to update the column
+     * headers of the table.
+     * 
+     * @return the data from params
+     */
+
+    public Data dataFromParams(
+        Data data,
+        Map<String, String> dataParams,
+        Map<String, String> columnMap)
+    {
+        Data newData = new Data();
+        if (data == null)
+        {
+            data = new Data();
+        }
+
+        if (dataParams.get("numRows") != null)
+        {
+            newData
+                .setNumberOfRows(Integer.parseInt(dataParams.get("numRows")));
+        }
+        else
+        {
+            newData.setNumberOfRows(data.getNumberOfRows());
+        }
+
+        if (dataParams.get("startRow") != null)
+        {
+            newData.setStartIndex(Integer.parseInt(dataParams.get("startRow")));
+        }
+        else
+        {
+            newData.setStartIndex(data.getStartIndex());
+        }
+
+        String insertionMode = dataParams.get("insertionMode");
+        if (insertionMode != null && insertionMode.equals("insert"))
+        {
+            newData.setInsertionMode(Data.InsertionMode.INSERT);
+        }
+
+        List<Column> existing = data.getColumns();
+        // Add existing column data to column map.
+        for (Column existingCol : existing)
+        {
+            String index = existingCol.getIndex();
+            String name = existingCol.getName();
+            // If column is being updated, set value, else add a new one.
+            if (columnMap.get(index) == null)
+            {
+                columnMap.put(index, name);
+            }
+        }
+
+        // Set columns on new data object.
+        for (String key : columnMap.keySet())
+        {
+            newData.addColumn(new Column(key, columnMap.get(key)));
+        }
+        return newData;
+    }
+    
+    public HashVector<String, WorksheetEntry> listWorksheets()
+    throws IOException, ServiceException
+{
+    HashVector<String, WorksheetEntry> whash = new HashVector<String, WorksheetEntry>();
+    WorksheetFeed feed = this.Service.getFeed(this.WorkSheetsFeedUrl, WorksheetFeed.class);
+    List<WorksheetEntry> entries = feed.getEntries();
+    whash = new  HashVector<String, WorksheetEntry>(entries.size());
+    
+    for(WorksheetEntry entry: entries)
+    {
+        whash.put(entry.getTitle().getPlainText(), entry);
+    }
+    return whash;
+}
+
+
     /** Base feed url of spreadsheets to use to construct record feed urls. */
     final static public String BaseFeedUrlStr =
         "http://spreadsheets.google.com/feeds/";
@@ -465,6 +563,7 @@ public class SpreadsheetFeedsHandler
     /** The URL of the table feed for the selected spreadsheet. */
     public URL TablesFeedUrl;
 
+    public URL WorkSheetsFeedUrl;
     /** Spreadsheet key of the loaded sheet. */
     public String SpreadsheetKey;
 
@@ -473,4 +572,8 @@ public class SpreadsheetFeedsHandler
     
     /** Reverse query results if true. */
     public boolean ReverseQueryResults = false;
+    
+    final static public String COLUMN_ENTRY_INSTR =
+        "Columns are specified as semicolon delimited column:value pairs,<br/>"+
+        "for example, A:Apple; B:Banana; C:Cantaloupe; D:Durian";
 }
