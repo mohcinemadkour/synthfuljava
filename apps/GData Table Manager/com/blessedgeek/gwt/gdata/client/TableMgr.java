@@ -10,6 +10,8 @@ import org.synthful.gwt.widgets.client.ui.ScrollableDialogBox;
 import org.synthful.gwt.widgets.client.ui.VerticalRadioButtonGroup;
 import org.synthful.gwt.widgets.client.ui.ScrollableDialogBox.CloserEventHandler;
 
+import com.blessedgeek.gwt.gdata.client.ui.TableInfoDialogContents;
+import com.blessedgeek.gwt.gdata.client.ui.TableMgrDialog;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,13 +26,17 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 /**
@@ -50,16 +56,20 @@ public class TableMgr
      * The message displayed to the user when the server cannot be reached or
      * returns an error.
      */
-    private static final String SERVER_ERROR =
+    public final static String SERVER_ERROR =
         "An error occurred while "
             + "attempting to contact the server. Please check your network "
             + "connection and try again.";
 
+    final static private String QUERY_INSTR =
+        "Enter query string using format<br/>" +
+        "{col-name}[=|&lt;|>]\"{literal string}\"<br/>" +
+        "[and|or] ...<p/>";
     /**
      * Create a remote service proxy to talk to the server-side Greeting
      * service.
      */
-    private final TableMgrServiceAsync tableMgrService =
+    final private TableMgrServiceAsync tableMgrService =
         GWT.create(TableMgrService.class);
 
     final Button sendButton = new Button("Send");
@@ -72,11 +82,19 @@ public class TableMgr
     final Label _currentTable = new Label();
     final HorizontalPanel currentTableHPanel = new HorizontalPanel();
 
+    final Label currentWorksheet = new Label();
+    final Label _currentWorksheet = new Label();
+    final HorizontalPanel currentWorksheetHPanel = new HorizontalPanel();
+
     final Button logInOutButton = new Button();
 
     final HTML header = new HTML("<h3>Gdata Table Manager</h3>");
 
     final ChoiceRadios actions = new ChoiceRadios("Action");
+    
+    final CheckBox refresh = new CheckBox("Refresh");
+    final public SendButtonHandler sendhandler = new SendButtonHandler();
+    final TableMgrDialog dialogBox = new TableMgrDialog();
     
     Object TriggerSendSource;
     
@@ -89,9 +107,6 @@ public class TableMgr
     final String pageHref = Location.getHref();
     String pageBaseHref;
     String logInOutUrl;
-
-    final SendButtonHandler sendhandler = new SendButtonHandler();
-    final TableMgrDialog dialogBox = new TableMgrDialog();
 
     /**
      * This is the entry point method.
@@ -109,12 +124,18 @@ public class TableMgr
         this.currentDocHPanel.add(this.currentDoc);
         this.currentTableHPanel.add(this._currentTable);
         this.currentTableHPanel.add(this.currentTable);
+        this.currentWorksheetHPanel.add(this._currentWorksheet);
+        this.currentWorksheetHPanel.add(this.currentWorksheet);
 
         // Add the wordField and sendButton to the RootPanel
         // Use RootPanel.get() to get the entire body element
         RootPanel.get("currentDoc").add(this.currentDocHPanel);
         RootPanel.get("currentDoc").add(this.currentTableHPanel);
-        RootPanel.get("sendButtonContainer").add(this.sendButton);
+        RootPanel.get("currentDoc").add(this.currentWorksheetHPanel);
+        final HorizontalPanel hpanel1 = new HorizontalPanel();
+        hpanel1.add(this.sendButton);
+        hpanel1.add(this.refresh);
+        RootPanel.get("sendButtonContainer").add(hpanel1);
         RootPanel.get("header").add(this.header);
         RootPanel.get("actions").add(this.actions);
         
@@ -140,6 +161,8 @@ public class TableMgr
         this.sendButton.addClickHandler(sendhandler);
         this.header.addClickHandler(sendhandler);
         this.logInOutButton.addClickHandler(new LogInOutButtonHandler());
+        this.dialogBox.Submit.addClickHandler(sendhandler);
+        this.dialogBox.CloserEventHandlers.add(new CloserHandler());
     }
     
     private void initPageHref()
@@ -156,28 +179,6 @@ public class TableMgr
     }
     
 
-    class ChoiceRadios
-        extends VerticalRadioButtonGroup
-    {
-        public ChoiceRadios(
-            String groupName)
-        {
-            super(
-                groupName,
-                    new LabelValuePair[]
-                {
-                    new LabelValuePair("List Sheet Documents", "" + Actions.ListSheetDocs),
-                    new LabelValuePair("List Tables", "" + Actions.ListTables),
-                    new LabelValuePair("List Table Info", "" + Actions.ListTableInfo),
-                    new LabelValuePair("List Table Records", "" + Actions.ListTableRecords),
-                    new LabelValuePair("Search for Record", "" + Actions.ShowSearch4Record),
-                    new LabelValuePair("Query for Record", "" + Actions.ShowQuery4Record),
-                },
-                0
-            );
-        }
-    }
-    
     private void mkAuthParams()
     {
         //RootPanel.get("authform").add(this.authform);
@@ -227,6 +228,22 @@ public class TableMgr
                 case Query4Record:
                     parameters.put("query", this.dialogBox.QueryBox.getText());
                     break;
+                    
+                case AddTable:
+                    parameters = this.dialogBox.tableInfoStuffs.mkParameters();
+                    parameters.put("action", this.currentAction.toString());
+                    this.currentAction = Actions.ListTables;
+                    break;
+                case AddWorksheet:
+                    parameters = this.dialogBox.worksheetInfoStuffs.mkParameters();
+                    parameters.put("action", this.currentAction.toString());
+                    this.currentAction = Actions.ListWorksheets;
+                    break;
+                case UpdateTable:
+                    parameters = this.dialogBox.tableInfoStuffs.mkParameters();
+                    parameters.put("action", this.currentAction.toString());
+                    this.currentAction = Actions.ListTableInfo;
+                    break;
             }
         }
         // the following is triggered from DialogBox close button.
@@ -245,9 +262,12 @@ public class TableMgr
                 case SetTable:
                     parameters.put("table", this.currentTableId); 
                     break;
+                case SetWorksheet:
+                    parameters.put("worksheet", this.currentWorksheet.getText());
             }
         }
-        
+        if (this.refresh.getValue())
+            parameters.put("refresh", "1");
         
         return parameters;
     }
@@ -260,20 +280,27 @@ public class TableMgr
         HashMap<String, String> paramHash = mkSendParameters(action);
         
         //for these cases, don't send to server, just display the dialogbox
-        if(this.currentAction==Actions.ShowSearch4Record)
-        {
-            dialogBox.showQueryWidgets("Enter literal to search<p/>");
-            currentAction = Actions.Search4Record;
-            return;
-        }
-        if(this.currentAction==Actions.ShowQuery4Record)
-        {
-            dialogBox.showQueryWidgets(
-                "Enter query string using format<br/>{col-name}[=|&lt;|>]\"{literal string}\"<br/>[and|or] ...<p/>");
-            currentAction = Actions.Query4Record;
-            return;
-        }
-        
+        if (this.currentAction!=null)
+            switch(this.currentAction)
+            {
+                case ShowSearch4Record:
+                    this.dialogBox.showQueryWidgets("Enter literal to search<p/>");
+                    this.currentAction = Actions.Search4Record;
+                    return;
+                case ShowQuery4Record:
+                    this.dialogBox.showQueryWidgets(QUERY_INSTR);
+                    this.currentAction = Actions.Query4Record;
+                    return;
+                case ShowAddTable:
+                    this.dialogBox.showUpdateTable("Add Table", null);
+                    this.currentAction=Actions.AddTable;
+                    return;
+                case ShowAddWorksheet:
+                    this.dialogBox.showAddWorksheet("Add Worksheet");
+                    this.currentAction=Actions.AddWorksheet;
+                    return;
+            }
+                
         if(paramHash==null)
             return;
         
@@ -306,6 +333,12 @@ public class TableMgr
                             dialogBox.setText("Select Document");
                             dialogBox.center();
                             break;
+                        case ListWorksheets:
+                            listDialogSelection(result, "title", "title");
+                            dialogBox.setText("Select Worksheet");
+                            dialogBox.center();
+                            break;
+                        //case AddTable:
                         case ListTables:
                             listDialogSelection(result, "title", "title");
                             dialogBox.setText("Select Table");
@@ -313,7 +346,15 @@ public class TableMgr
                             break;
                         case SetSheetDoc:
                         case SetTable:
+                        case SetWorksheet:
                             break;
+                        case ListTableInfo:
+                            dialogBox.showTableInfo("Table Info", result);
+                            break;
+                        case ShowUpdateTable:
+                            dialogBox.showUpdateTable("Update Table Info", result);
+                            currentAction = Actions.UpdateTable;
+                            return;
                             
                         default:
                             dialogBox.showRpcHtml(result);
@@ -370,87 +411,34 @@ public class TableMgr
             });
     }
     
-    class TableMgrDialog
-    extends ScrollableDialogBox
+    
+    class ChoiceRadios
+        extends VerticalRadioButtonGroup
     {
-        public TableMgrDialog()
+        public ChoiceRadios(
+            String groupName)
         {
-            this.setText("GData Table Manager");
-            this.setAnimationEnabled(true);
-            
-            VPanel.addStyleName("dialogVPanel");
-            VPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
-                    
-            this.setSizePx(400,300);            
-            this.setWidget(VPanel);
-            
-            this.QueryBox.setTextAlignment(TextBox.ALIGN_LEFT);
-            
-            this.CloserEventHandlers.add(new CloserHandler());
-            
-            this.Submit.setHTML("Send");
-            this.Submit.addClickHandler(sendhandler);
+            super(
+                groupName,
+                new LabelValuePair[]
+                {
+                    new LabelValuePair("List Sheet Documents", "" + Actions.ListSheetDocs),
+                    new LabelValuePair("List Worksheets", "" + Actions.ListWorksheets),
+                    new LabelValuePair("List Tables", "" + Actions.ListTables),
+                    new LabelValuePair("List Table Info", "" + Actions.ListTableInfo),
+                    new LabelValuePair("List Table Records", "" + Actions.ListTableRecords),
+                    new LabelValuePair("Search for Record", "" + Actions.ShowSearch4Record),
+                    new LabelValuePair("Query for Record", "" + Actions.ShowQuery4Record),
+                    new LabelValuePair("Add Table", "" + Actions.ShowAddTable),
+                    new LabelValuePair("Update Table", "" + Actions.ShowUpdateTable),
+                    new LabelValuePair("Add Worksheet", "" + Actions.ShowAddWorksheet),
+                },
+                0
+            );
         }
-        
-        @Override
-        final public void add(Widget w)
-        {
-            this.VPanel.add(w);
-        }
-        
-        @Override
-        final public boolean remove(Widget w)
-        {
-            return this.VPanel.remove(w);
-        }
-        
-        @Override
-        final public void clear()
-        {
-            this.VPanel.clear();
-        }
-        
-        final public void showQueryWidgets(String instructions)
-        {
-            this.clear();
-            this.htmlContent.setHTML(instructions);
-            this.add(this.htmlContent);
-            this.add(this.QueryBox);
-            this.add(this.Submit);
-            this.QueryBox.setText("");
-            this.center();
-        }
-        
-        final void showHtml(String text)
-        {
-            this.clear();
-            this.add(htmlContent);
-            this.htmlContent.setHTML(text);
-            this.center();
-        }
-        
-        final public void showRpcHtml(String text)
-        {
-            this.htmlContent.removeStyleName("serverResponseLabelError");
-            this.showHtml(text);
-        }
-        
-        final public void showRpcFailureHtml()
-        {
-            this.htmlContent.addStyleName("serverResponseLabelError");
-            this.showHtml(SERVER_ERROR);
-        }
-        
-        final public VerticalPanel VPanel = new VerticalPanel();
-        
-        public RadioButtonGroup Selection;
-
-        final public TextBox QueryBox = new TextBox();
-        final public Button Submit = new Button();
-        
-        final HTML htmlContent = new HTML();
     }
     
+   
     class SendButtonHandler
         implements ClickHandler, KeyUpHandler
     {
@@ -493,7 +481,7 @@ public class TableMgr
         }
     }
     
-    private class CloserHandler
+    public class CloserHandler
     implements CloserEventHandler
     {
 
@@ -529,6 +517,8 @@ public class TableMgr
                     _currentTable.setText("");
                     currentTable.setText("");
                     currentTableId = null;
+                    _currentWorksheet.setText("");
+                    currentWorksheet.setText("");
                     sendToServer(Actions.SetSheetDoc);
                     break;
                     
@@ -537,6 +527,12 @@ public class TableMgr
                     currentTable.setText(selectedTxt);
                     currentTableId = selectedValue;
                     sendToServer(Actions.SetTable);
+                    break;
+                    
+                case ListWorksheets:
+                    _currentWorksheet.setText("current Worksheet:");
+                    currentWorksheet.setText(selectedTxt);
+                    sendToServer(Actions.SetWorksheet);
                     break;
                     
 
@@ -557,8 +553,11 @@ public class TableMgr
     {
         NONE, LogIn, LogOut, About,
         ListSheetDocs, SetSheetDoc,
+        ListWorksheets, SetWorksheet,
+        AddWorksheet, ShowAddWorksheet, DeleteWorksheet,
         ListTables, SetTable,
-        AddTable, DeleteTable,
+        ShowUpdateTable, UpdateTable,
+        ShowAddTable, AddTable, DeleteTable,
         ListTableInfo, ListTableRecords,
         AddRecord, DeleteRecord,
         ShowSearch4Record, Search4Record,
@@ -576,7 +575,4 @@ public class TableMgr
         }
     }
     
-    public static native void alertSheetEntries()
-    /*-{$wnd.alert("sheetEntries:"+sheetEntries);
-     }-*/;
 }

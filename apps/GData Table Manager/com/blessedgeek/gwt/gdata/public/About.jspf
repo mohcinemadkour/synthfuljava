@@ -7,3 +7,4 @@ Server info:<br>
 <%=serverInfo%><br><br>
 Browser's system info:<br>
 <%=userAgent%>
+SessionAuthToken=CIK06_ejEBCk_NnCBg

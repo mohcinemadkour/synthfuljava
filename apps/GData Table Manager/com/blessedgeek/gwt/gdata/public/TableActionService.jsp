@@ -18,6 +18,16 @@ String pg = mrBean.action.toString();
 switch (mrBean.action)
 {
     case AddTable:
+        mrBean.FeedsHdlr.addNewTableEntry(parameters);
+        pg = "ListTables.jspf";
+        break;
+    case AddWorksheet:
+        String title = parameters.get("title");
+        String numrows = parameters.get("numrows");
+        String numcols = parameters.get("numcols");
+        mrBean.FeedsHdlr.addWorksheet(title, numrows, numcols);
+        pg = "ListWorksheets.jspf";
+        break;
     case DeleteTable:
     case AddRecord:
     case DeleteRecord:
@@ -50,17 +60,28 @@ switch (mrBean.action)
         mrBean.ResultRecords = mrBean.FeedsHdlr.listAllRecordEntries();
         pg = "ListRecords.jspf";
         break;
+    case ListWorksheets:
     case ListTableInfo:
     case ListTables:
-    case ListSheetDocs:
         pg = mrBean.action.toString() + ".jspf";
         break;
+    case ListSheetDocs:
+        String refresh = parameters.get("refresh");
+        mrBean.listDocs(refresh!=null);
+        pg = mrBean.action.toString() + ".jspf";
+        break;
+    case ShowUpdateTable:
+        pg = "ListTableInfo.jspf";
     case SetSheetDoc:
         mrBean.setSheetDoc(parameters.get("sheetKey"));
         %><script type="text/javascript">location.replace("TableMgr.jsp");</script><%
         return;
     case SetTable:
         mrBean.setTable(parameters.get("table"));
+        %><script type="text/javascript">location.replace("TableMgr.jsp");</script><%
+        return;
+    case SetWorksheet:
+        mrBean.setWorksheet(parameters.get("worksheet"));
         %><script type="text/javascript">location.replace("TableMgr.jsp");</script><%
         return;
 

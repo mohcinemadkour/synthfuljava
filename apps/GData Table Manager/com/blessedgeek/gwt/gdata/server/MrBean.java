@@ -8,6 +8,7 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -16,12 +17,19 @@ import org.synthful.gdata.SpreadsheetFeedsHandler;
 import org.synthful.util.HashVector;
 
 import com.blessedgeek.gwt.gdata.client.TableMgr;
+import com.google.common.collect.Maps;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.PlainTextConstruct;
+import com.google.gdata.data.spreadsheet.Column;
+import com.google.gdata.data.spreadsheet.Data;
 import com.google.gdata.data.spreadsheet.Field;
+import com.google.gdata.data.spreadsheet.Header;
 import com.google.gdata.data.spreadsheet.RecordEntry;
 import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.TableEntry;
+import com.google.gdata.data.spreadsheet.Worksheet;
+import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
@@ -33,26 +41,25 @@ public class MrBean
         this.FeedsHdlr = new SpreadsheetFeedsHandler(this.Service);
         this.EntriesCached = new HashMap<String, RecordEntry>();
     }
-    
-    
-    public void readAuthToken(HttpServletRequest request)
+
+    public void readAuthToken(
+        HttpServletRequest request)
     {
         String authToken = request.getParameter("token");
         System.out.println(authToken);
-        
-        if (authToken != null && authToken.length()>5)
+
+        if (authToken != null && authToken.length() > 5)
         {
-            //String authToken0 =
-            //    AuthSubUtil.getTokenFromReply(request.getQueryString());
-            //System.out.println("authToken0=" + authToken0);
-            
+            // String authToken0 =
+            // AuthSubUtil.getTokenFromReply(request.getQueryString());
+            // System.out.println("authToken0=" + authToken0);
+
             this.AuthToken = authToken;
             try
             {
                 this.SessionAuthToken =
-                    AuthSubUtil.exchangeForSessionToken(
-                        this.AuthToken, null);
-                
+                    AuthSubUtil.exchangeForSessionToken(this.AuthToken, null);
+
                 this.Service.setAuthSubToken(this.SessionAuthToken);
                 this.FeedsHdlr.initSpreadsheetFeed(true);
             }
@@ -74,8 +81,9 @@ public class MrBean
 
         }
     }
-    
-    public void setSheetDoc(String sheetKey)
+
+    public void setSheetDoc(
+        String sheetKey)
     {
         try
         {
@@ -87,64 +95,72 @@ public class MrBean
             e.printStackTrace();
         }
     }
-    
-    static public boolean logTokenInfo(String token, java.security.PrivateKey key)
+
+    static public boolean logTokenInfo(
+        String token, java.security.PrivateKey key)
     {
-        if (token==null)
+        if (token == null)
         {
             System.out.println("No token info: Token is null.");
             return false;
         }
-        
-        try {
-            Map<String, String> tokenInfo = AuthSubUtil.getTokenInfo(token, key);
-            System.out.println("tokenInfo:"+ tokenInfo);
-            for(Map.Entry<String, String> info: tokenInfo.entrySet())
+
+        try
+        {
+            Map<String, String> tokenInfo =
+                AuthSubUtil.getTokenInfo(token, key);
+            System.out.println("tokenInfo:" + tokenInfo);
+            for (Map.Entry<String, String> info : tokenInfo.entrySet())
             {
-                System.out.println(info.getKey()+':'+info.getValue());
+                System.out.println(info.getKey() + ':' + info.getValue());
             }
-            
+
             return true;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             ex.printStackTrace();
             return false;
         }
     }
-    
-    public void listDocs()
+
+    public void listDocs(boolean refresh)
     {
-        try {
-            this.SpreadsheetEntries =  this.FeedsHdlr.listDocs(false);
+        try
+        {
+            this.SpreadsheetEntries = this.FeedsHdlr.listDocs(refresh);
         }
         catch (Exception e)
         {
+            e.printStackTrace();
         }
     }
-    
+
     public void listTables()
     {
-        try {
-            this.TableEntries =  this.FeedsHdlr.listTables(this.TableEntries);
+        try
+        {
+            this.TableEntries = this.FeedsHdlr.listTables(this.TableEntries);
         }
         catch (Exception e)
         {
+            e.printStackTrace();
         }
     }
-    
-    public void setTable(String title)
-    throws MalformedURLException
+
+    public void setTable(
+        String title)
+        throws MalformedURLException
     {
         this.Table = this.TableEntries.get(title);
         String pos = "" + this.TableEntries.getKeyPosition(title);
-        
+
         String recordsFeedUrlStr = this.FeedsHdlr.RecordsFeedUrl + pos;
         this.FeedsHdlr.TableRecordsFeedUrl = new URL(recordsFeedUrlStr);
     }
-    
-    public void listRecords ()
-    throws IOException, ServiceException
+
+    public void listRecords()
+        throws IOException, ServiceException
     {
         List<RecordEntry> entries = this.FeedsHdlr.listAllRecordEntries();
         for (RecordEntry entry : entries)
@@ -156,16 +172,47 @@ public class MrBean
             }
         }
     }
-    
+
+    public void listWorksheets()
+    {
+        try
+        {
+            this.WorksheetEntries = this.FeedsHdlr.listWorksheets();
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
+    public void setWorksheet(
+        String title)
+        throws MalformedURLException
+    {
+        this.Worksheet = this.WorksheetEntries.get(title);
+    }
+
     public TableMgr.Actions action;
+
     public String AuthToken, SessionAuthToken;
+
     public SpreadsheetFeedsHandler FeedsHdlr;
+
     public SpreadsheetService Service;
+
     public Map<String, RecordEntry> EntriesCached;
+
     public String SpreadsheetKey;
+
     public List<SpreadsheetEntry> SpreadsheetEntries;
+
     public HashVector<String, TableEntry> TableEntries;
+
+    public HashVector<String, WorksheetEntry> WorksheetEntries;
+
     public TableEntry Table;
+    
+    public WorksheetEntry Worksheet;
+
     public List<RecordEntry> ResultRecords;
-    //public SpreadsheetEntry SelectedSpreadsheetEntry;
+    // public SpreadsheetEntry SelectedSpreadsheetEntry;
 }

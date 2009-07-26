@@ -9,6 +9,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class VerticalRadioButtonGroup
     extends VerticalPanel
 {
+    protected VerticalRadioButtonGroup(String radioGroupName)
+    {
+        
+    }
+    
     public VerticalRadioButtonGroup(
         String radioGroup,
         String[] labels,

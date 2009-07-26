@@ -7,31 +7,25 @@ java.util.List,
 com.google.gdata.data.spreadsheet.TableEntry,
 com.google.gdata.data.spreadsheet.Data,
 com.google.gdata.data.spreadsheet.Column"
-%>
-<jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
+%><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
 <%
 TableEntry entry = mrBean.Table;
 Data data = entry.getData();
-%>
-<div>Id/Feed URL: <%=entry.getId()%></div>
-<div>Title: <%=entry.getTitle().getPlainText()%></div>
-<div>Summary: <%=entry.getSummary().getPlainText()%></div>
-<div>Worksheet: <%=entry.getWorksheet().getName()%></div>
-
-<div>Header: <%=entry.getHeader().getRow()%></div>
-
-<div>InsertionMode= <%=data.getInsertionMode().name()%></div>
-<div>StartRow= <%=data.getStartIndex()%></div>
-<div>Rows= <%=data.getNumberOfRows()%></div>
-
-<p>Columns:</p>
-<table border='1'>
-<tr>
-<%
+%>{
+"id":"<%=entry.getId()%>",
+"title":"<%=entry.getTitle().getPlainText()%>",
+"summary":"<%=entry.getSummary().getPlainText()%>",
+"worksheet":"<%=entry.getWorksheet().getName()%>",
+"header":"<%=entry.getHeader().getRow()%>",
+"insertionMode":"<%=data.getInsertionMode().name()%>",
+"startRow":"<%=data.getStartIndex()%>",
+"numRows":"<%=data.getNumberOfRows()%>",
+"columns":"<%
+int i=0;
 for (Column col : data.getColumns())
 {
-    %><th><%=col.getIndex()%> <%=col.getName()%></th><%
+    %><%=i>0?";":""%><%=col.getIndex()%>:<%=col.getName()%><%
+    i++;
 }
-%>
-</tr>
-</table>
+%>"
+}

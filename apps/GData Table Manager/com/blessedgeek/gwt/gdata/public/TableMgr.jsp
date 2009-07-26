@@ -12,6 +12,8 @@ com.blessedgeek.gwt.gdata.server.MrBean"
 if (mrBean.SessionAuthToken==null)
 {
     mrBean.SessionAuthToken = request.getParameter("SessionAuthToken");
+    mrBean.Service.setAuthSubToken(mrBean.SessionAuthToken);
+    mrBean.FeedsHdlr.initSpreadsheetFeed(true);
     if (!MrBean.logTokenInfo(mrBean.SessionAuthToken, null))
         mrBean.SessionAuthToken = null;
 }

@@ -8,7 +8,6 @@ com.google.gdata.data.spreadsheet.SpreadsheetEntry"
 %><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
 [{"message":"Select a document"}
 <%
-mrBean.listDocs();
 System.out.println("entries=" + mrBean.SpreadsheetEntries);
 response.setContentType("text/json");
 for (SpreadsheetEntry entry : mrBean.SpreadsheetEntries)
