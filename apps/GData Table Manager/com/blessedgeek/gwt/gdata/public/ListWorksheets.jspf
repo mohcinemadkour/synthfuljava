@@ -9,9 +9,9 @@ com.google.gdata.data.spreadsheet.WorksheetEntry"
 />[{"message":"Select a table"}
 <%
 mrBean.listWorksheets();
-System.out.println("entries=" + mrBean.TableEntries);
+System.out.println("entries=" + mrBean.FeedsHdlr.TableEntries);
 response.setContentType("text/json");
-for (WorksheetEntry entry : mrBean.WorksheetEntries.toVector())
+for (WorksheetEntry entry : mrBean.FeedsHdlr.WorksheetEntries.toVector())
 {
 %>,{
     "worksheet":"<%=entry.getId()%>",

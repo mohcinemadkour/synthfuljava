@@ -7,7 +7,7 @@ pageEncoding="utf-8"
 <%
 mrBean.readAuthToken(request);
 System.out.println("AuthToken=" + mrBean.AuthToken);
-System.out.println("SessionAuthToken=" + mrBean.SessionAuthToken);
+System.out.println("SessionAuthToken=" + mrBean.FeedsHdlr.SessionAuthToken);
 %>
 <script type="text/javascript">
 location.replace("TableMgr.jsp");

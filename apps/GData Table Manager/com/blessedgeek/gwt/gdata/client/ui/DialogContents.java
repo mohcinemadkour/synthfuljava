@@ -25,9 +25,12 @@ extends AbsolutePanel
     
     protected int margin=5, row = 0, colWidth = 100, rowHeight = 30;
     
-    public void useDialogBoxButton()
+    public void useDialogBoxButton(boolean use)
     {
-        this.add(this.dialogBox.Submit, this.margin, this.margin + (row*rowHeight));            
+        if (use)
+            this.add(this.dialogBox.Submit, this.margin, this.margin + (row*rowHeight));
+        else
+            this.remove(this.dialogBox.Submit);
     }
     
     protected void add(Label l, TextBoxBase t)

@@ -8,10 +8,10 @@ com.google.gdata.client.http.AuthSubUtil"
 <jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
 <%
 String callBackLocation = request.getParameter("callBackLocation");
-System.out.println(mrBean.SessionAuthToken);
+System.out.println(mrBean.FeedsHdlr.SessionAuthToken);
 try{
- AuthSubUtil.revokeToken(mrBean.SessionAuthToken,null);
- mrBean.SessionAuthToken = null;
+ AuthSubUtil.revokeToken(mrBean.FeedsHdlr.SessionAuthToken,null);
+ mrBean.FeedsHdlr.SessionAuthToken = null;
  mrBean.AuthToken = null;
 }
 catch (Exception ex)

@@ -118,7 +118,7 @@ implements ToStringBufferable, EmptyFactory
                 	continue;
                 
                 try{
-                	put ((K)key, (V)value);
+                	this.put ((K)key, (V)value);
                 }
                 catch (ClassCastException ex)
                 {
@@ -162,7 +162,7 @@ implements ToStringBufferable, EmptyFactory
     public V get (int position)
     {
         if (position < KeysVector.size () && position >= 0)
-            return get (KeysVector.get (position));
+            return this.get (KeysVector.get (position));
         
         return null;
     }
@@ -228,7 +228,8 @@ implements ToStringBufferable, EmptyFactory
         if(key==null||value==null)
             return this;
         super.put (key, value);
-        KeysVector.add (key);
+        if(!KeysVector.contains(key))
+            KeysVector.add (key);
         return this;
     }
     
@@ -242,7 +243,7 @@ implements ToStringBufferable, EmptyFactory
     {
     	try{
 	    	V val = this.get(key);
-	    	this.remove(key);
+	    	super.remove(key);
 	    	this.KeysVector.remove(key);
 	    	return val;
     	}

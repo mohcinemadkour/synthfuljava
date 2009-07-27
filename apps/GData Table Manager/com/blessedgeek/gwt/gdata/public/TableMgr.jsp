@@ -9,19 +9,19 @@ com.blessedgeek.gwt.gdata.server.MrBean"
 <jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
 <%
 //mrBean.readAuthToken(request);
-if (mrBean.SessionAuthToken==null)
+if (mrBean.FeedsHdlr.SessionAuthToken==null)
 {
-    mrBean.SessionAuthToken = request.getParameter("SessionAuthToken");
-    mrBean.Service.setAuthSubToken(mrBean.SessionAuthToken);
+    mrBean.FeedsHdlr.SessionAuthToken = request.getParameter("SessionAuthToken");
+    mrBean.Service.setAuthSubToken(mrBean.FeedsHdlr.SessionAuthToken);
     mrBean.FeedsHdlr.initSpreadsheetFeed(true);
-    if (!MrBean.logTokenInfo(mrBean.SessionAuthToken, null))
-        mrBean.SessionAuthToken = null;
+    if (!MrBean.logTokenInfo(mrBean.FeedsHdlr.SessionAuthToken, null))
+        mrBean.FeedsHdlr.SessionAuthToken = null;
 }
 
 System.out.println("AuthToken=" + mrBean.AuthToken);
-System.out.println("SessionAuthToken=" + mrBean.SessionAuthToken);
-String logIn = mrBean.SessionAuthToken==null?"logIn":"logOut";
-MrBean.logTokenInfo(mrBean.SessionAuthToken, null);
+System.out.println("SessionAuthToken=" + mrBean.FeedsHdlr.SessionAuthToken);
+String logIn = mrBean.FeedsHdlr.SessionAuthToken==null?"logIn":"logOut";
+MrBean.logTokenInfo(mrBean.FeedsHdlr.SessionAuthToken, null);
 %>
 <html>
   <head>

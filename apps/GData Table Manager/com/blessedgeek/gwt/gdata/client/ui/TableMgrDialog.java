@@ -66,11 +66,14 @@ public class TableMgrDialog
         {
             this.clear();
             this.tableInfoStuffs.clearTextFields();
-            result = result.trim();
-            if (result!=null && result.length()>2)
-                this.tableInfoStuffs.listTableInfo(result);
+            if (result!=null)
+            {
+                result = result.trim();
+                if (result.length()>2)
+                    this.tableInfoStuffs.listTableInfo(result);
+            }
             this.add(tableInfoStuffs);
-            this.tableInfoStuffs.useDialogBoxButton();
+            this.tableInfoStuffs.useDialogBoxButton(true);
             this.tableInfoStuffs.enableTextFields(true);
             this.setText(caption);
             this.center();  
@@ -84,7 +87,7 @@ public class TableMgrDialog
             if (result!=null && result.length()>2)
                 this.tableInfoStuffs.listTableInfo(result);
             this.add(tableInfoStuffs);
-            //this.tableInfoStuffs.useDialogBoxButton();
+            this.tableInfoStuffs.useDialogBoxButton(false);
             this.tableInfoStuffs.enableTextFields(false);
             this.setText(caption);
             this.center();  

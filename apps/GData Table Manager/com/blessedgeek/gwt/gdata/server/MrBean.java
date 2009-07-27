@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,42 +58,22 @@ public class MrBean
             this.AuthToken = authToken;
             try
             {
-                this.SessionAuthToken =
-                    AuthSubUtil.exchangeForSessionToken(this.AuthToken, null);
-
-                this.Service.setAuthSubToken(this.SessionAuthToken);
+                this.FeedsHdlr.authenticateSession(authToken, this.authKey);
                 this.FeedsHdlr.initSpreadsheetFeed(true);
             }
             catch (AuthenticationException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch (IOException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch (GeneralSecurityException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 
-        }
-    }
-
-    public void setSheetDoc(
-        String sheetKey)
-    {
-        try
-        {
-            this.FeedsHdlr.setDoc(sheetKey);
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
     }
 
@@ -124,27 +105,44 @@ public class MrBean
         }
     }
 
-    public void listDocs(boolean refresh)
+    public HashVector<String, SpreadsheetEntry> listDocs(boolean refresh)
     {
         try
         {
-            this.SpreadsheetEntries = this.FeedsHdlr.listDocs(refresh);
+            this.FeedsHdlr.mapDocs(refresh);
+            return this.FeedsHdlr.SpreadsheetEntries;
         }
         catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void setSheetDoc(
+        String sheetKey)
+    {
+        try
+        {
+            this.FeedsHdlr.setDoc(sheetKey);
+        }
+        catch (IOException e)
         {
             e.printStackTrace();
         }
     }
 
-    public void listTables()
+    public HashVector<String, TableEntry> listTables()
     {
         try
         {
-            this.TableEntries = this.FeedsHdlr.listTables(this.TableEntries);
+            this.FeedsHdlr.mapTables();
+            return this.FeedsHdlr.TableEntries;
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            return null;
         }
     }
 
@@ -152,13 +150,35 @@ public class MrBean
         String title)
         throws MalformedURLException
     {
-        this.Table = this.TableEntries.get(title);
-        String pos = "" + this.TableEntries.getKeyPosition(title);
+        this.Table = this.FeedsHdlr.TableEntries.get(title);
+        String pos = "" + this.FeedsHdlr.TableEntries.getKeyPosition(title);
 
         String recordsFeedUrlStr = this.FeedsHdlr.RecordsFeedUrl + pos;
         this.FeedsHdlr.TableRecordsFeedUrl = new URL(recordsFeedUrlStr);
     }
 
+    public HashVector<String, WorksheetEntry> listWorksheets()
+    {
+        try
+        {
+            this.FeedsHdlr.mapWorksheets();
+            return this.FeedsHdlr.WorksheetEntries;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void setWorksheet(
+        String title)
+        throws MalformedURLException
+    {
+        this.Worksheet = this.FeedsHdlr.WorksheetEntries.get(title);
+    }
+
+    // useless function
     public void listRecords()
         throws IOException, ServiceException
     {
@@ -173,27 +193,9 @@ public class MrBean
         }
     }
 
-    public void listWorksheets()
-    {
-        try
-        {
-            this.WorksheetEntries = this.FeedsHdlr.listWorksheets();
-        }
-        catch (Exception e)
-        {
-        }
-    }
-
-    public void setWorksheet(
-        String title)
-        throws MalformedURLException
-    {
-        this.Worksheet = this.WorksheetEntries.get(title);
-    }
-
     public TableMgr.Actions action;
 
-    public String AuthToken, SessionAuthToken;
+    public String AuthToken;
 
     public SpreadsheetFeedsHandler FeedsHdlr;
 
@@ -203,16 +205,11 @@ public class MrBean
 
     public String SpreadsheetKey;
 
-    public List<SpreadsheetEntry> SpreadsheetEntries;
-
-    public HashVector<String, TableEntry> TableEntries;
-
-    public HashVector<String, WorksheetEntry> WorksheetEntries;
-
     public TableEntry Table;
     
     public WorksheetEntry Worksheet;
 
     public List<RecordEntry> ResultRecords;
-    // public SpreadsheetEntry SelectedSpreadsheetEntry;
+
+    public PrivateKey authKey;
 }

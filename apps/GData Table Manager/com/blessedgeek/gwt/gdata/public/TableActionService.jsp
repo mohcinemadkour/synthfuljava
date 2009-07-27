@@ -17,6 +17,12 @@ String sheetKey = request.getParameter("sheetKey");
 String pg = mrBean.action.toString();
 switch (mrBean.action)
 {
+    case UpdateTable:
+        mrBean.FeedsHdlr.updateTableEntry(parameters);
+        //break;
+    case ShowUpdateTable:
+        pg = "ListTableInfo.jspf";
+        break;
     case AddTable:
         mrBean.FeedsHdlr.addNewTableEntry(parameters);
         pg = "ListTables.jspf";
@@ -70,8 +76,6 @@ switch (mrBean.action)
         mrBean.listDocs(refresh!=null);
         pg = mrBean.action.toString() + ".jspf";
         break;
-    case ShowUpdateTable:
-        pg = "ListTableInfo.jspf";
     case SetSheetDoc:
         mrBean.setSheetDoc(parameters.get("sheetKey"));
         %><script type="text/javascript">location.replace("TableMgr.jsp");</script><%

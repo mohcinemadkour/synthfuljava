@@ -9,9 +9,9 @@ com.google.gdata.data.spreadsheet.TableEntry"
 />[{"message":"Select a table"}
 <%
 mrBean.listTables();
-System.out.println("entries=" + mrBean.TableEntries);
+System.out.println("entries=" + mrBean.FeedsHdlr.TableEntries);
 response.setContentType("text/json");
-for (TableEntry entry : mrBean.TableEntries.toVector())
+for (TableEntry entry : mrBean.FeedsHdlr.TableEntries.toVector())
 {
 %>,{
     "table":"<%=entry.getId()%>",

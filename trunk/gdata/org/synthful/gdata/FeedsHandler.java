@@ -2,8 +2,11 @@ package org.synthful.gdata;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 
 import com.google.gdata.client.GoogleService;
+import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.FeedURLFactory;
 import com.google.gdata.util.AuthenticationException;
 
@@ -54,6 +57,22 @@ public class FeedsHandler
       // Authenticate
       this.Service.setUserCredentials(username, password);
     }
+    
+    public void authenticateSession(String authToken, PrivateKey key)
+    throws AuthenticationException, IOException, GeneralSecurityException
+    {
+        this.SessionAuthToken =
+            AuthSubUtil.exchangeForSessionToken(authToken, key);
+
+        this.Service.setAuthSubToken(this.SessionAuthToken);
+    }
+
+    public void restoreSessionAuth(String sessionAuthToken)
+    throws AuthenticationException, IOException, GeneralSecurityException
+    {
+        this.SessionAuthToken = sessionAuthToken;
+        this.Service.setAuthSubToken(this.SessionAuthToken);
+    }
 
     public void setDoc(
         String docKey)
@@ -67,6 +86,7 @@ public class FeedsHandler
 
     public GoogleService Service;
     protected FeedURLFactory FeedUrlFactory = FeedURLFactory.getDefault();
+    public String SessionAuthToken;
     public URL ListDocsFeedUrl;
     public String CurrentDocKey;
 }
