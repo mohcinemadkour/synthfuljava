@@ -29,7 +29,6 @@ import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.util.ServiceException;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class FeedsHandler.
  */
@@ -89,27 +88,24 @@ public class SpreadsheetFeedsHandler
     public URL getWorksheetFeed(String spreadsheetKey)
     {
         SpreadsheetEntry sentry =
-            this.SpreadsheetMappedEntries.get(spreadsheetKey);
+            this.SpreadsheetEntries.get(spreadsheetKey);
         return
             sentry.getWorksheetFeedUrl();
     }
 
-    public List<SpreadsheetEntry> listDocs(boolean refresh)
+    public void mapDocs(boolean refresh)
     throws IOException, ServiceException
     {
         this.initSpreadsheetFeed(true);
-        if (this.Spreadsheets == null || refresh)
+        if (this.SpreadsheetEntries == null || refresh)
         {
-            this.Spreadsheets = this.SpreadsheetFeed.getEntries();
-            this.SpreadsheetMappedEntries =
-                Collections.synchronizedMap(
-                    new HashMap<String, SpreadsheetEntry>(this.Spreadsheets.size()));
+            List<SpreadsheetEntry> entries = this.SpreadsheetFeed.getEntries();
+            this.SpreadsheetEntries =
+                    new HashVector<String, SpreadsheetEntry>(entries.size());
             
-            for(SpreadsheetEntry entry: Spreadsheets)
-                this.SpreadsheetMappedEntries.put(entry.getKey(), entry);
+            for(SpreadsheetEntry entry: entries)
+                this.SpreadsheetEntries.put(entry.getKey(), entry);
         }
-        
-        return this.Spreadsheets;
     }
         
     
@@ -173,18 +169,17 @@ public class SpreadsheetFeedsHandler
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ServiceException the service exception
      */
-    public HashMap<String, TableEntry> listTables(HashMap<String, TableEntry> nullObj)
+    public HashVector<String, TableEntry> mapTables()
         throws IOException, ServiceException
     {
-        nullObj = new HashMap<String, TableEntry>();
         TableFeed feed = this.Service.getFeed(this.TablesFeedUrl, TableFeed.class);
         List<TableEntry> entries = feed.getEntries();
-        nullObj = new  HashMap<String, TableEntry>(entries.size());
+        this.TableEntries = new  HashVector<String, TableEntry>(entries.size());
         for(TableEntry entry: entries)
         {
-            nullObj.put(entry.getTitle().getPlainText(), entry);
+            this.TableEntries.put(entry.getTitle().getPlainText(), entry);
         }
-        return nullObj;
+        return this.TableEntries;
     }
     
     /**
@@ -373,8 +368,27 @@ public class SpreadsheetFeedsHandler
         this.Service.insert(this.WorkSheetsFeedUrl, newWorksheet);
     }
     
-    public void addNewTableEntry(
-        Map<String, String> params)
+    public void updateTableEntry(Map<String, String> params)
+        throws IOException, ServiceException
+    {
+        String title = params.get("title");
+        if (title==null || title.length()==0)
+            return;
+        
+        TableEntry entry = this.TableEntries.get(title);
+        if (entry==null)
+            return;
+        String pos = "" + this.TableEntries.getKeyPosition(title);
+        URL tableFeedUrl = new URL(this.TablesFeedUrl+pos);
+
+        this.entryContentsFromParams(entry, params);
+        //this.TableEntries.remove(entry);
+        entry = //entry.update();
+            this.Service.update(tableFeedUrl, entry);
+        this.TableEntries.put(entry.getTitle().toString(), entry);
+    }
+
+    public void addNewTableEntry(Map<String, String> params)
         throws IOException, ServiceException
     {
         TableEntry newEntry =
@@ -498,9 +512,9 @@ public class SpreadsheetFeedsHandler
 
         String insertionMode = dataParams.get("insertionMode");
         if (insertionMode != null && insertionMode.equals("insert"))
-        {
             newData.setInsertionMode(Data.InsertionMode.INSERT);
-        }
+        else
+            newData.setInsertionMode(data.getInsertionMode());
 
         List<Column> existing = data.getColumns();
         // Add existing column data to column map.
@@ -523,20 +537,19 @@ public class SpreadsheetFeedsHandler
         return newData;
     }
     
-    public HashVector<String, WorksheetEntry> listWorksheets()
+    public HashVector<String, WorksheetEntry> mapWorksheets()
     throws IOException, ServiceException
-{
-    HashVector<String, WorksheetEntry> whash = new HashVector<String, WorksheetEntry>();
-    WorksheetFeed feed = this.Service.getFeed(this.WorkSheetsFeedUrl, WorksheetFeed.class);
-    List<WorksheetEntry> entries = feed.getEntries();
-    whash = new  HashVector<String, WorksheetEntry>(entries.size());
-    
-    for(WorksheetEntry entry: entries)
     {
-        whash.put(entry.getTitle().getPlainText(), entry);
+        WorksheetFeed feed = this.Service.getFeed(this.WorkSheetsFeedUrl, WorksheetFeed.class);
+        List<WorksheetEntry> entries = feed.getEntries();
+        this.WorksheetEntries = new  HashVector<String, WorksheetEntry>(entries.size());
+        
+        for(WorksheetEntry entry: entries)
+        {
+            this.WorksheetEntries.put(entry.getTitle().getPlainText(), entry);
+        }
+        return this.WorksheetEntries;
     }
-    return whash;
-}
 
 
     /** Base feed url of spreadsheets to use to construct record feed urls. */
@@ -549,9 +562,10 @@ public class SpreadsheetFeedsHandler
     /** Our view of Google Spreadsheets as an authenticated Google user. */
     public SpreadsheetService SpreadsheetService;
     
-    public List<SpreadsheetEntry> Spreadsheets;
-    public Map<String, SpreadsheetEntry> SpreadsheetMappedEntries;
-    
+    public HashVector<String, SpreadsheetEntry> SpreadsheetEntries;
+    public HashVector<String, TableEntry> TableEntries;
+    public HashVector<String, WorksheetEntry> WorksheetEntries;
+
     public SpreadsheetFeed SpreadsheetFeed;
 
     /** The URL of the record feed for the specified table. */
