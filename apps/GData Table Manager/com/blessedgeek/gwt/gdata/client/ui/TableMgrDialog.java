@@ -30,6 +30,7 @@ public class TableMgrDialog
             
             
             this.Submit.setHTML("Send");
+            this.Submit.setStyleName("sendButton");
         }
         
         @Override
@@ -50,7 +51,21 @@ public class TableMgrDialog
             this.VPanel.clear();
         }
         
-        final public void showQueryWidgets(String instructions)
+        final public void showRadioButtons(String result, String hashkey1, String hashkey2)
+        {
+            this.clear();
+            try {
+                this.radioButtonJson.listDialogSelection(result, hashkey1, hashkey2);
+            }
+            catch (Exception e)
+            {
+                this.showRpcHtml(result);
+            }        
+
+            this.center();
+        }
+        
+        final public void showQueryWidgets(String caption, String instructions)
         {
             this.clear();
             this.htmlContent.setHTML(instructions);
@@ -58,7 +73,7 @@ public class TableMgrDialog
             this.add(this.QueryBox);
             this.add(this.Submit);
             this.QueryBox.setText("");
-            this.setText(instructions);
+            this.setText(caption);
             this.center();
         }
         
@@ -75,6 +90,7 @@ public class TableMgrDialog
             this.add(tableInfoStuffs);
             this.tableInfoStuffs.useDialogBoxButton(true);
             this.tableInfoStuffs.enableTextFields(true);
+            this.tableInfoStuffs.adjustSize();
             this.setText(caption);
             this.center();  
         }
@@ -83,12 +99,16 @@ public class TableMgrDialog
         {
             this.clear();
             this.tableInfoStuffs.clearTextFields();
-            result = result.trim();
-            if (result!=null && result.length()>2)
-                this.tableInfoStuffs.listTableInfo(result);
+            if (result!=null)
+            {
+                result = result.trim();
+                if (result.length()>2)
+                    this.tableInfoStuffs.listTableInfo(result);
+            }
             this.add(tableInfoStuffs);
             this.tableInfoStuffs.useDialogBoxButton(false);
             this.tableInfoStuffs.enableTextFields(false);
+            this.tableInfoStuffs.adjustSize();
             this.setText(caption);
             this.center();  
         }
@@ -98,8 +118,9 @@ public class TableMgrDialog
             this.clear();
             this.worksheetInfoStuffs.clearTextFields();
             this.add(worksheetInfoStuffs);
-            this.worksheetInfoStuffs.addButton(this.Submit);
             this.worksheetInfoStuffs.enableTextFields(true);
+            this.worksheetInfoStuffs.useDialogBoxButton(true);
+            this.worksheetInfoStuffs.adjustSize();
             this.setText(caption);
             this.center();  
         }
@@ -136,5 +157,7 @@ public class TableMgrDialog
         final public TableInfoDialogContents tableInfoStuffs =
             new TableInfoDialogContents(this);
         final public WorksheetInfoDialogContents worksheetInfoStuffs =
-            new WorksheetInfoDialogContents();
+            new WorksheetInfoDialogContents(this);
+        final private RadioButtonsDialogContents radioButtonJson =
+            new RadioButtonsDialogContents(this);
 }

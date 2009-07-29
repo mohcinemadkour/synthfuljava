@@ -6,7 +6,7 @@ import="
 java.util.List,
 com.google.gdata.data.spreadsheet.WorksheetEntry"
 %><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"
-/>[{"message":"Select a table"}
+/>[{"message":"Select a worksheet"}
 <%
 mrBean.listWorksheets();
 System.out.println("entries=" + mrBean.FeedsHdlr.TableEntries);

@@ -163,6 +163,10 @@ public class TableMgr
         this.logInOutButton.addClickHandler(new LogInOutButtonHandler());
         this.dialogBox.Submit.addClickHandler(sendhandler);
         this.dialogBox.CloserEventHandlers.add(new CloserHandler());
+        
+        this.sendButton.setStyleName("sendButton");
+        this.logInOutButton.setStyleName("sendButton");
+        this.actions.setStyleName("actions");
     }
     
     private void initPageHref()
@@ -191,7 +195,11 @@ public class TableMgr
         this.authform.setMethod("get");
     }
 
-    
+    /**
+     * Decisions on actions before sending to server
+     * @param action
+     * @return
+     */
     private HashMap<String, String> mkSendParameters(Actions action)
     {
         HashMap<String, String> parameters =
@@ -216,6 +224,9 @@ public class TableMgr
             this.sendButton.setEnabled(false);
         }
         
+        // Prior actions succesfully reciprocated by server
+        // resulted in dialog box displayed.
+        // New action triggered by dialog box submit button
         else if (TriggerSendSource==dialogBox.Submit)
         {
             parameters.put("action", this.currentAction.toString());
@@ -246,9 +257,13 @@ public class TableMgr
                     break;
             }
         }
-        // the following is triggered from DialogBox close button.
-        // this.actions.getSelected() cannot be used because dialogbox
-        // close button onclick handler resets it to 0.
+        
+        // Prior actions succesfully reciprocated by server
+        // resulted in dialog box displayed.
+        // New action is triggered by DialogBox close button.
+        //
+        // *note: this.actions.getSelected() cannot be used because
+        // dialogbox close button onclick handler has reset it to 0.
         // this.currentAction will be set to Actions.SetSheetDoc.
         else
         {
@@ -279,16 +294,21 @@ public class TableMgr
     {
         HashMap<String, String> paramHash = mkSendParameters(action);
         
-        //for these cases, don't send to server, just display the dialogbox
+        //After parameters construction, but before sending to server,
+        //determine cases of actions that result in dialogBox displayed
+        //rather than sending to server.
+        //For these cases, don't send to server, just display the dialogbox.
         if (this.currentAction!=null)
             switch(this.currentAction)
             {
                 case ShowSearch4Record:
-                    this.dialogBox.showQueryWidgets("Enter literal to search<p/>");
+                    this.dialogBox.showQueryWidgets(
+                        "Search for Literal", "Enter literal to search<p/>");
                     this.currentAction = Actions.Search4Record;
                     return;
                 case ShowQuery4Record:
-                    this.dialogBox.showQueryWidgets(QUERY_INSTR);
+                    this.dialogBox.showQueryWidgets(
+                        "Sructured Query", QUERY_INSTR);
                     this.currentAction = Actions.Query4Record;
                     return;
                 case ShowAddTable:
@@ -325,24 +345,22 @@ public class TableMgr
                         dialogBox.setText(currentAction.toString());
                     else
                         dialogBox.setText("GData Table Manager");
-                    
+                    // After sending to server and on receiving successful
+                    // server reciprocation.
                     switch (currentAction)
                     {
                         case ListSheetDocs:
-                            listDialogSelection(result, "key", "title");
-                            dialogBox.setText("Select Document");
-                            dialogBox.center();
+                            dialogBox.showRadioButtons(result, "key", "title");
+                            //dialogBox.setText("Select Document");
                             break;
                         case ListWorksheets:
-                            listDialogSelection(result, "title", "title");
-                            dialogBox.setText("Select Worksheet");
-                            dialogBox.center();
+                            dialogBox.showRadioButtons(result, "title", "title");
+                            //dialogBox.setText("Select Worksheet");
                             break;
                         //case AddTable:
                         case ListTables:
-                            listDialogSelection(result, "title", "title");
-                            dialogBox.setText("Select Table");
-                            dialogBox.center();
+                            dialogBox.showRadioButtons(result, "title", "title");
+                            //dialogBox.setText("Select Table");
                             break;
                         case SetSheetDoc:
                         case SetTable:
@@ -361,53 +379,6 @@ public class TableMgr
                             break;
                     }
                 }
-                                
-                void listDialogSelection(String result, String hashkey1, String hashkey2)
-                {
-                    try
-                    {
-                        JSONValue resultjs = JSONParser.parse(result);
-                        System.out.println(resultjs);
-                        JSONArray entriesjs = resultjs.isArray();
-                        if (entriesjs != null)
-                        {
-                            JSONObject entryjs = entriesjs.get(0).isObject();
-                            JSONValue dialogMsg = entryjs.get("message");
-                            dialogBox.setText(dialogMsg.toString());
-                            
-                            LabelValuePair[] options = new LabelValuePair[entriesjs.size()];
-                            options[0] =
-                                new LabelValuePair("None", "");
-                            
-                            for (int i = 1; i < entriesjs.size(); i++)
-                            {
-                                entryjs = entriesjs.get(i).isObject();
-                                JSONValue key = entryjs.get(hashkey1);
-                                JSONValue title = entryjs.get(hashkey2);
-                                if (key==null || key.toString().length()==0)
-                                    continue;
-                                    
-                                options[i] =
-                                    new LabelValuePair(
-                                        title.isString().stringValue(),
-                                        key.isString().stringValue());
-                            }
-                            
-                            // attach choice buttons to dialogVPanel, without default button
-                            // with radio group name = SelectSheet
-                            dialogBox.clear();
-                            dialogBox.Selection =
-                                new RadioButtonGroup(dialogBox.VPanel, "SelectSheet", options, 0);
-                            dialogBox.center();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        dialogBox.showRpcHtml(result);
-                    }        
-                }
-                
-            
             });
     }
     
@@ -548,30 +519,14 @@ public class TableMgr
         }
     }
 
-    
-    static public enum Actions
-    {
-        NONE, LogIn, LogOut, About,
-        ListSheetDocs, SetSheetDoc,
-        ListWorksheets, SetWorksheet,
-        AddWorksheet, ShowAddWorksheet, DeleteWorksheet,
-        ListTables, SetTable,
-        ShowUpdateTable, UpdateTable,
-        ShowAddTable, AddTable, DeleteTable,
-        ListTableInfo, ListTableRecords,
-        AddRecord, DeleteRecord,
-        ShowSearch4Record, Search4Record,
-        ShowQuery4Record, Query4Record
-    };
-    
-    static public TableMgr.Actions getAction(String actionStr)
+    static public Actions getAction(String actionStr)
     {
         try {
-            return TableMgr.Actions.valueOf(actionStr); 
+            return Actions.valueOf(actionStr); 
         }
         catch(Exception ex)
         {
-            return TableMgr.Actions.NONE;
+            return Actions.NONE;
         }
     }
     

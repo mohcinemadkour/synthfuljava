@@ -11,22 +11,26 @@ com.blessedgeek.gwt.gdata.server.MrBean"
 //mrBean.readAuthToken(request);
 if (mrBean.FeedsHdlr.SessionAuthToken==null)
 {
-    mrBean.FeedsHdlr.SessionAuthToken = request.getParameter("SessionAuthToken");
+  mrBean.FeedsHdlr.SessionAuthToken = request.getParameter("SessionAuthToken");
+  if(mrBean.FeedsHdlr.SessionAuthToken!=null)
+  {
     mrBean.Service.setAuthSubToken(mrBean.FeedsHdlr.SessionAuthToken);
     mrBean.FeedsHdlr.initSpreadsheetFeed(true);
-    if (!MrBean.logTokenInfo(mrBean.FeedsHdlr.SessionAuthToken, null))
-        mrBean.FeedsHdlr.SessionAuthToken = null;
+  }
 }
+
+if (mrBean.FeedsHdlr.SessionAuthToken!=null)
+ if (!MrBean.logTokenInfo(mrBean.FeedsHdlr.SessionAuthToken, null))
+   mrBean.FeedsHdlr.SessionAuthToken = null;
 
 System.out.println("AuthToken=" + mrBean.AuthToken);
 System.out.println("SessionAuthToken=" + mrBean.FeedsHdlr.SessionAuthToken);
 String logIn = mrBean.FeedsHdlr.SessionAuthToken==null?"logIn":"logOut";
-MrBean.logTokenInfo(mrBean.FeedsHdlr.SessionAuthToken, null);
 %>
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="../Woowho.css">
+    <link type="text/css" rel="stylesheet" href="Woowho.css">
     <title>TableMgr</title>
     <script type="text/javascript" language="javascript" src="TableMgr.nocache.js"></script>
   </head>

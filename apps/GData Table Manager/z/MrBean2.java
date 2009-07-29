@@ -1,4 +1,6 @@
-package com.blessedgeek.gwt.gdata.server;
+package z;
+
+
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -11,22 +13,19 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.synthful.gdata.SpreadsheetFeedsHandler;
-import org.synthful.util.HashVector;
 
-import com.blessedgeek.gwt.gdata.client.Actions;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.Field;
 import com.google.gdata.data.spreadsheet.RecordEntry;
-import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.TableEntry;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
-public class MrBean
+public class MrBean2
 {
-    public MrBean()
+    public MrBean2()
     {
         this.Service = new SpreadsheetService("Table Manager");
         this.FeedsHdlr = new SpreadsheetFeedsHandler(this.Service);
@@ -94,19 +93,6 @@ public class MrBean
         }
     }
 
-    public HashVector<String, SpreadsheetEntry> listDocs(boolean refresh)
-    {
-        try
-        {
-            this.FeedsHdlr.mapDocs(refresh);
-            return this.FeedsHdlr.SpreadsheetEntries;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public void setSheetDoc(
         String sheetKey)
@@ -121,19 +107,6 @@ public class MrBean
         }
     }
 
-    public HashVector<String, TableEntry> listTables()
-    {
-        try
-        {
-            this.FeedsHdlr.mapTables();
-            return this.FeedsHdlr.TableEntries;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public void setTable(
         String title)
@@ -146,19 +119,6 @@ public class MrBean
         this.FeedsHdlr.TableRecordsFeedUrl = new URL(recordsFeedUrlStr);
     }
 
-    public HashVector<String, WorksheetEntry> listWorksheets()
-    {
-        try
-        {
-            this.FeedsHdlr.mapWorksheets();
-            return this.FeedsHdlr.WorksheetEntries;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public void setWorksheet(
         String title)
@@ -181,8 +141,6 @@ public class MrBean
             }
         }
     }
-
-    public Actions action;
 
     public String AuthToken;
 

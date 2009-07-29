@@ -23,12 +23,16 @@ extends AbsolutePanel
         this.addTextFields();
     }
     
-    protected int margin=5, row = 0, colWidth = 100, rowHeight = 30;
+    protected int margin=5, colWidth = 100, rowHeight = 30;
+    protected float row = 0;
     
     public void useDialogBoxButton(boolean use)
     {
         if (use)
-            this.add(this.dialogBox.Submit, this.margin, this.margin + (row*rowHeight));
+        {
+            this.add(this.dialogBox.Submit, this.margin, this.margin + (int)(row*rowHeight));
+            this.usingDialogBoxButton = use;
+        }
         else
             this.remove(this.dialogBox.Submit);
     }
@@ -37,15 +41,16 @@ extends AbsolutePanel
     {
         if (l!=null)
         {
-            this.add(l, 5, 5 + (row*rowHeight));
+            this.add(l, 5, 5 + (int)(row*rowHeight));
             l.setWidth(colWidth+"px");
             l.setHorizontalAlignment(Label.ALIGN_RIGHT);
+            l.setStyleName("dialog");
         }
         if (t!=null)
         {
-            this.add(t, 10 + colWidth, 5 + (row*rowHeight));
+            this.add(t, 10 + colWidth, 5 + (int)(row*rowHeight));
             if (t instanceof TextArea)
-                row++;
+                row += 0.5;
         }
         
         row++;
@@ -99,7 +104,7 @@ extends AbsolutePanel
         }
     }
     
-    abstract protected void defineFields();
+    abstract protected LabelParamPair[] defineFields();
        
     final protected HashMap<String, String> sendParameters = new HashMap<String, String>(5);
     
@@ -130,5 +135,12 @@ extends AbsolutePanel
         public TextBoxBase Field;
     }
     
+    public void adjustSize()
+    {
+        this.setHeight((row+(usingDialogBoxButton?1:0))*rowHeight+"px");
+        this.setWidth("350px");
+    }
+    
     static private String blank = "";
+    private boolean usingDialogBoxButton = false;
 }

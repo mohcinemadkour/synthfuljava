@@ -1,4 +1,6 @@
-package com.blessedgeek.gwt.gdata.server;
+package z;
+
+
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -13,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.synthful.gdata.SpreadsheetFeedsHandler;
 import org.synthful.util.HashVector;
 
-import com.blessedgeek.gwt.gdata.client.Actions;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.Field;
@@ -24,9 +25,9 @@ import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
-public class MrBean
+public class MrBean1
 {
-    public MrBean()
+    public MrBean1()
     {
         this.Service = new SpreadsheetService("Table Manager");
         this.FeedsHdlr = new SpreadsheetFeedsHandler(this.Service);
@@ -181,8 +182,6 @@ public class MrBean
             }
         }
     }
-
-    public Actions action;
 
     public String AuthToken;
 
