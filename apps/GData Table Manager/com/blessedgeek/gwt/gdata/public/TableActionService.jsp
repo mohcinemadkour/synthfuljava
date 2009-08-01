@@ -5,7 +5,8 @@
  extends="com.blessedgeek.gwt.gdata.server.TableMgrServiceImplJspBeanable"
  import="com.blessedgeek.gwt.gdata.client.TableMgr,com.blessedgeek.gwt.gdata.server.MrBean"%>
 
-<%@page import="com.google.gdata.util.InvalidEntryException"%><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean"
+<%@page import="com.google.gdata.util.InvalidEntryException"%>
+<%@page import="com.blessedgeek.gwt.gdata.server.SessionSilo"%><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean"
  scope="session" />
 <%
 String action = this.parameters.get("action");
@@ -21,18 +22,18 @@ switch (mrBean.action)
         mrBean.FeedsHdlr.updateTableEntry(parameters);
         //break;
     case ShowUpdateTable:
-        pg = "ListTableInfo.jspf";
+        pg = "ListTableInfo.jsp";
         break;
     case AddTable:
         mrBean.FeedsHdlr.addNewTableEntry(parameters);
-        pg = "ListTables.jspf";
+        pg = "ListTables.jsp";
         break;
     case AddWorksheet:
         String title = parameters.get("title");
         String numrows = parameters.get("numrows");
         String numcols = parameters.get("numcols");
         mrBean.FeedsHdlr.addWorksheet(title, numrows, numcols);
-        pg = "ListWorksheets.jspf";
+        pg = "ListWorksheets.jsp";
         break;
     case DeleteTable:
     case AddRecord:
@@ -48,7 +49,7 @@ switch (mrBean.action)
             %>Invalid Search:<br/><%=queryStr%><%
             return;
         }
-        pg = "ListRecords.jspf";
+        pg = "ListRecords.jsp";
         break;
     case Query4Record:
         queryStr = parameters.get("query");
@@ -60,21 +61,21 @@ switch (mrBean.action)
             %>Invalid Query:<br/><%=queryStr%><%
             return;
         }
-        pg = "ListRecords.jspf";
+        pg = "ListRecords.jsp";
         break;
     case ListTableRecords:
         mrBean.ResultRecords = mrBean.FeedsHdlr.listAllRecordEntries();
-        pg = "ListRecords.jspf";
+        pg = "ListRecords.jsp";
         break;
     case ListWorksheets:
     case ListTableInfo:
     case ListTables:
-        pg = mrBean.action.toString() + ".jspf";
+        pg = mrBean.action.toString() + ".jsp";
         break;
     case ListSheetDocs:
         String refresh = parameters.get("refresh");
         mrBean.listDocs(refresh!=null);
-        pg = mrBean.action.toString() + ".jspf";
+        pg = mrBean.action.toString() + ".jsp";
         break;
     case SetSheetDoc:
         mrBean.setSheetDoc(parameters.get("sheetKey"));
@@ -90,10 +91,10 @@ switch (mrBean.action)
         return;
 
     default:
-        pg = "About.jspf";
+        pg = "About.jsp";
         break;
 }
 
-System.out.println("Action:" + pg);
+SessionSilo.logTableAction.info("Action:" + pg);
 %><jsp:include page="<%=pg%>" flush="true" />
 

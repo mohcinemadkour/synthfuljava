@@ -4,29 +4,48 @@ language="java"
 contentType="text/html; charset=utf-8"
 pageEncoding="utf-8"
 import="
-com.blessedgeek.gwt.gdata.server.MrBean"
+com.blessedgeek.gwt.gdata.server.MrBean,
+org.synthful.gdata.SpreadsheetFeedsSilo,
+com.blessedgeek.gwt.gdata.server.SessionSilo"
 %>
 <jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
 <%
-//mrBean.readAuthToken(request);
+SessionSilo.initCache();
+
+SessionSilo.logTableMgr.info(session.getId());
+mrBean.setSessionId(session);
+SessionSilo.logTableMgr.info(mrBean.sessionId);
+SessionSilo.logTableMgr.info("mrBean.FeedsHdlr=" + mrBean.FeedsHdlr);
+SessionSilo.logTableMgr.info("mrBean.FeedsHdlr service=" + mrBean.FeedsHdlr.getService());
+String token = request.getParameter("token");
+if (token!=null&&token.length()>0)
+{
+    String sessionAuthToken = mrBean.readAuthToken(request);
+    System.out.println(sessionAuthToken);
+}
+
 if (mrBean.FeedsHdlr.SessionAuthToken==null)
 {
   mrBean.FeedsHdlr.SessionAuthToken = request.getParameter("SessionAuthToken");
   if(mrBean.FeedsHdlr.SessionAuthToken!=null)
   {
-    mrBean.Service.setAuthSubToken(mrBean.FeedsHdlr.SessionAuthToken);
-    mrBean.FeedsHdlr.initSpreadsheetFeed(true);
+    mrBean.FeedsHdlr.getService().setAuthSubToken(mrBean.FeedsHdlr.SessionAuthToken);
+    SpreadsheetFeedsSilo.initSpreadsheetFeed(true);
   }
 }
 
+SessionSilo.logTableMgr.info("SessionAuthToken=" + mrBean.FeedsHdlr.SessionAuthToken);
 if (mrBean.FeedsHdlr.SessionAuthToken!=null)
  if (!MrBean.logTokenInfo(mrBean.FeedsHdlr.SessionAuthToken, null))
    mrBean.FeedsHdlr.SessionAuthToken = null;
 
-System.out.println("AuthToken=" + mrBean.AuthToken);
-System.out.println("SessionAuthToken=" + mrBean.FeedsHdlr.SessionAuthToken);
+SessionSilo.logTableMgr.info("AuthToken=" + mrBean.AuthToken);
+SessionSilo.logTableMgr.info("SessionAuthToken=" + mrBean.FeedsHdlr.SessionAuthToken);
+SessionSilo.logTableMgr.info("mrBean.hash=" + mrBean.hashCode());
+SessionSilo.logTableMgr.info("mrBean.FeedsHdlr.hash=" + mrBean.FeedsHdlr.hashCode());
 String logIn = mrBean.FeedsHdlr.SessionAuthToken==null?"logIn":"logOut";
 %>
+
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">

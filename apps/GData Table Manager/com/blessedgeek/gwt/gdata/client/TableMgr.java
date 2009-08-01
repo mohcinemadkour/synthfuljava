@@ -24,6 +24,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -93,8 +94,9 @@ public class TableMgr
     final ChoiceRadios actions = new ChoiceRadios("Action");
     
     final CheckBox refresh = new CheckBox("Refresh");
+    final public CheckBox Debug = new CheckBox("Debug");
     final public SendButtonHandler sendhandler = new SendButtonHandler();
-    final TableMgrDialog dialogBox = new TableMgrDialog();
+    final TableMgrDialog dialogBox = new TableMgrDialog(this);
     
     Object TriggerSendSource;
     
@@ -144,15 +146,18 @@ public class TableMgr
         {
             this.logInOutButton.setText("Log In");
             this.logInOutUrl = "LogIn.jsp?callBackBaseHref="+ this.pageBaseHref;
-            logInOut.add(this.logInOutButton);
         }
         else
         {
             logInOut = RootPanel.get("logOut");
             this.logInOutButton.setText("Log Out");
             this.logInOutUrl = "LogOut.jsp?callBackLocation="+ this.pageHref;
-            logInOut.add(this.logInOutButton);
         }
+        
+        final HorizontalPanel hpanel2 = new HorizontalPanel();
+        hpanel2.add(this.logInOutButton);
+        hpanel2.add(this.Debug);
+        logInOut.add(hpanel2);
         
         this.mkAuthParams();
 
@@ -347,6 +352,8 @@ public class TableMgr
                         dialogBox.setText("GData Table Manager");
                     // After sending to server and on receiving successful
                     // server reciprocation.
+                    if (Debug.getValue())
+                        Window.alert(currentAction.toString());
                     switch (currentAction)
                     {
                         case ListSheetDocs:

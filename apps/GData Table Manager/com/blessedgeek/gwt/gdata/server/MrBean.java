@@ -1,16 +1,20 @@
 package com.blessedgeek.gwt.gdata.server;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.synthful.gdata.SpreadsheetFeedsHandler;
+import org.synthful.gdata.SpreadsheetFeedsSilo;
 import org.synthful.util.HashVector;
 
 import com.blessedgeek.gwt.gdata.client.Actions;
@@ -25,18 +29,22 @@ import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
 public class MrBean
+implements Serializable
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 5015854859088660127L;
+
     public MrBean()
     {
-        this.Service = new SpreadsheetService("Table Manager");
-        this.FeedsHdlr = new SpreadsheetFeedsHandler(this.Service);
     }
 
-    public void readAuthToken(
+    public String readAuthToken(
         HttpServletRequest request)
     {
         String authToken = request.getParameter("token");
-        System.out.println(authToken);
+        SessionSilo.logMrBean.info("authToken=" + authToken);
 
         if (authToken != null && authToken.length() > 5)
         {
@@ -47,31 +55,57 @@ public class MrBean
             this.AuthToken = authToken;
             try
             {
+                if (this.FeedsHdlr.getService()==null)
+                    SpreadsheetFeedsSilo.SpreadsheetService =
+                        new SpreadsheetService("Table Manager");
+                
                 this.FeedsHdlr.authenticateSession(authToken, this.authKey);
-                this.FeedsHdlr.initSpreadsheetFeed(true);
+                SessionSilo.logMrBean.info("SessionAuthToken=" + this.FeedsHdlr.SessionAuthToken);
+                SpreadsheetFeedsSilo.initSpreadsheetFeed(true);
+                //if (this.FeedsHdlr.SessionAuthToken!=null)
+                //    this.AuthToken = null;
+                SessionSilo.logMrBean.info("SessionAuthToken=" + this.FeedsHdlr.SessionAuthToken);
+                SessionSilo.logMrBean.info("hash=" + this.hashCode());
+                SessionSilo.logMrBean.info("FeedsHdlr hash=" + this.FeedsHdlr.hashCode());
+                return this.FeedsHdlr.SessionAuthToken;
             }
             catch (AuthenticationException e)
             {
-                e.printStackTrace();
+                SessionSilo.logMrBean.info(e.toString());
+                return e.toString();
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                SessionSilo.logMrBean.info(e.toString());
+                return e.toString();
             }
             catch (GeneralSecurityException e)
             {
-                e.printStackTrace();
+                SessionSilo.logMrBean.info(e.toString());
+                return e.toString();
+            }
+            catch (ServiceException e)
+            {
+                SessionSilo.logMrBean.info(e.toString());
+                return e.toString();
+            }
+            catch (Exception e)
+            {
+                SessionSilo.logMrBean.info(e.toString());
+                return e.toString();
             }
 
         }
+        return authToken;
     }
 
     static public boolean logTokenInfo(
         String token, java.security.PrivateKey key)
     {
+        SessionSilo.logMrBean.info("token:" + token);
         if (token == null)
         {
-            System.out.println("No token info: Token is null.");
+            SessionSilo.logMrBean.info("No token info: Token is null.");
             return false;
         }
 
@@ -79,17 +113,18 @@ public class MrBean
         {
             Map<String, String> tokenInfo =
                 AuthSubUtil.getTokenInfo(token, key);
-            System.out.println("tokenInfo:" + tokenInfo);
+            SessionSilo.logMrBean.info("tokenInfo:" + tokenInfo);
             for (Map.Entry<String, String> info : tokenInfo.entrySet())
             {
-                System.out.println(info.getKey() + ':' + info.getValue());
+                SessionSilo.logMrBean.info
+                    (info.getKey() + ':' + info.getValue());
             }
 
             return true;
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            ex.printStackTrace();
+            SessionSilo.logMrBean.info(e.toString());
             return false;
         }
     }
@@ -99,13 +134,13 @@ public class MrBean
         try
         {
             this.FeedsHdlr.mapDocs(refresh);
-            return this.FeedsHdlr.SpreadsheetEntries;
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            return null;
+            SessionSilo.logMrBean.info(e.toString());
         }
+        
+        return this.FeedsHdlr.SpreadsheetEntries;
     }
 
     public void setSheetDoc(
@@ -117,7 +152,7 @@ public class MrBean
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            SessionSilo.logMrBean.info(e.toString());
         }
     }
 
@@ -130,7 +165,7 @@ public class MrBean
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            SessionSilo.logMrBean.info(e.toString());
             return null;
         }
     }
@@ -155,7 +190,7 @@ public class MrBean
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            SessionSilo.logMrBean.info(e.toString());
             return null;
         }
     }
@@ -165,6 +200,15 @@ public class MrBean
         throws MalformedURLException
     {
         this.Worksheet = this.FeedsHdlr.WorksheetEntries.get(title);
+    }
+    
+    public String setSessionId(HttpSession sess)
+    {
+        SessionSilo.logMrBean.info(sess.getId());
+        if (this.sessionId==null)
+            this.sessionId = sess.getId();
+        SessionSilo.logMrBean.info(this.sessionId);
+        return this.sessionId;
     }
 
     // useless function
@@ -182,13 +226,14 @@ public class MrBean
         }
     }
 
+    final public SpreadsheetFeedsHandler FeedsHdlr =
+        new SpreadsheetFeedsHandler(
+            new SpreadsheetService("Table Manager")
+        );
+
     public Actions action;
 
     public String AuthToken;
-
-    public SpreadsheetFeedsHandler FeedsHdlr;
-
-    public SpreadsheetService Service;
 
     public String SpreadsheetKey;
 
@@ -199,4 +244,6 @@ public class MrBean
     public List<RecordEntry> ResultRecords;
 
     public PrivateKey authKey;
+    
+    public String sessionId;
 }

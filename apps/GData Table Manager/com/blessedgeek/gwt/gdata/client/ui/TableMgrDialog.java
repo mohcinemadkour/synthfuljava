@@ -4,6 +4,7 @@ import org.synthful.gwt.widgets.client.ui.RadioButtonGroup;
 import org.synthful.gwt.widgets.client.ui.ScrollableDialogBox;
 
 import com.blessedgeek.gwt.gdata.client.TableMgr;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextArea;
@@ -15,8 +16,9 @@ public class TableMgrDialog
     extends ScrollableDialogBox
 {
 
-        public TableMgrDialog()
+        public TableMgrDialog(TableMgr tmgr)
         {
+            this.tableMgr = tmgr;
             this.setText("GData Table Manager");
             this.setAnimationEnabled(true);
             
@@ -53,6 +55,10 @@ public class TableMgrDialog
         
         final public void showRadioButtons(String result, String hashkey1, String hashkey2)
         {
+            if (tableMgr.Debug.getValue())
+            {
+                Window.alert("showRadioButtons");
+            }
             this.clear();
             try {
                 this.radioButtonJson.listDialogSelection(result, hashkey1, hashkey2);
@@ -79,6 +85,10 @@ public class TableMgrDialog
         
         final public void showUpdateTable(String caption, String result)
         {
+            if (tableMgr.Debug.getValue())
+            {
+                Window.alert("showUpdateTable");
+            }
             this.clear();
             this.tableInfoStuffs.clearTextFields();
             if (result!=null)
@@ -97,6 +107,10 @@ public class TableMgrDialog
         
         final public void showTableInfo(String caption, String result)
         {
+            if (tableMgr.Debug.getValue())
+            {
+                Window.alert("showTableInfo");
+            }
             this.clear();
             this.tableInfoStuffs.clearTextFields();
             if (result!=null)
@@ -115,6 +129,10 @@ public class TableMgrDialog
         
         final public void showAddWorksheet(String caption)
         {
+            if (tableMgr.Debug.getValue())
+            {
+                Window.alert("showAddWorksheet");
+            }
             this.clear();
             this.worksheetInfoStuffs.clearTextFields();
             this.add(worksheetInfoStuffs);
@@ -127,6 +145,10 @@ public class TableMgrDialog
         
         final void showHtml(String text)
         {
+            if (tableMgr.Debug.getValue())
+            {
+                Window.alert("showHtml");
+            }
             this.clear();
             this.add(htmlContent);
             this.htmlContent.setHTML(text);
@@ -141,6 +163,10 @@ public class TableMgrDialog
         
         final public void showRpcFailureHtml()
         {
+            if (tableMgr.Debug.getValue())
+            {
+                Window.alert("showRpcFailureHtml");
+            }
             this.htmlContent.addStyleName("serverResponseLabelError");
             this.showHtml(TableMgr.SERVER_ERROR);
         }
@@ -148,6 +174,7 @@ public class TableMgrDialog
         final public VerticalPanel VPanel = new VerticalPanel();
         
         public RadioButtonGroup Selection;
+        public TableMgr tableMgr;
 
         final public TextArea QueryBox = new TextArea();
         final public Button Submit = new Button();

@@ -3,9 +3,11 @@ language="java"
 contentType="text/html; charset=utf-8"
 pageEncoding="utf-8"
 import="
-com.google.gdata.client.http.AuthSubUtil"
+com.google.gdata.client.http.AuthSubUtil,
+com.blessedgeek.gwt.gdata.server.SessionSilo"
 %>
 <%
+SessionSilo.logTableMgr.info(session.getId());
 String callBackBaseHref = request.getParameter("callBackBaseHref");
 
 String authReqUrl =
@@ -16,6 +18,7 @@ String authReqUrl =
         true);
 //pageContext.forward(authReqUrl);
 %>
+
 <script type="text/javascript">
 //alert("<%=authReqUrl%>");
 location.replace("<%=authReqUrl%>");
