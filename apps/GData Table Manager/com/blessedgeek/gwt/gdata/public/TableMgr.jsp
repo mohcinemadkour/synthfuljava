@@ -7,45 +7,37 @@ import="
 com.blessedgeek.gwt.gdata.server.MrBean,
 org.synthful.gdata.SpreadsheetFeedsSilo,
 com.blessedgeek.gwt.gdata.server.SessionSilo"
-%>
-<jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
-<%
-SessionSilo.initCache();
+%><%
+MrBean mrBean = SessionSilo.initSessionBean(session.getId());
 
 SessionSilo.logTableMgr.info(session.getId());
-mrBean.setSessionId(session);
 SessionSilo.logTableMgr.info(mrBean.sessionId);
-SessionSilo.logTableMgr.info("mrBean.FeedsHdlr=" + mrBean.FeedsHdlr);
-SessionSilo.logTableMgr.info("mrBean.FeedsHdlr service=" + mrBean.FeedsHdlr.getService());
-String token = request.getParameter("token");
-if (token!=null&&token.length()>0)
-{
-    String sessionAuthToken = mrBean.readAuthToken(request);
-    System.out.println(sessionAuthToken);
-}
+SessionSilo.logTableMgr.info("mrBean.FeedsHdlr service=" + mrBean.getService());
 
-if (mrBean.FeedsHdlr.SessionAuthToken==null)
+if (mrBean.sessionAuthToken==null)
 {
-  mrBean.FeedsHdlr.SessionAuthToken = request.getParameter("SessionAuthToken");
-  if(mrBean.FeedsHdlr.SessionAuthToken!=null)
+  mrBean.sessionAuthToken = request.getParameter("SessionAuthToken");
+  if(mrBean.sessionAuthToken!=null)
   {
-    mrBean.FeedsHdlr.getService().setAuthSubToken(mrBean.FeedsHdlr.SessionAuthToken);
+    mrBean.getService().setAuthSubToken(mrBean.sessionAuthToken);
     SpreadsheetFeedsSilo.initSpreadsheetFeed(true);
   }
 }
 
-SessionSilo.logTableMgr.info("SessionAuthToken=" + mrBean.FeedsHdlr.SessionAuthToken);
-if (mrBean.FeedsHdlr.SessionAuthToken!=null)
- if (!MrBean.logTokenInfo(mrBean.FeedsHdlr.SessionAuthToken, null))
-   mrBean.FeedsHdlr.SessionAuthToken = null;
+SessionSilo.logTableMgr.info("SessionAuthToken=" + mrBean.sessionAuthToken);
 
-SessionSilo.logTableMgr.info("AuthToken=" + mrBean.AuthToken);
-SessionSilo.logTableMgr.info("SessionAuthToken=" + mrBean.FeedsHdlr.SessionAuthToken);
+if (mrBean.sessionAuthToken!=null)
+ if (!SessionSilo.logTokenInfo(mrBean.sessionAuthToken, null))
+   mrBean.sessionAuthToken = null;
+
+SessionSilo.storeSessionBean(mrBean);
+
+SessionSilo.logTableMgr.info("AuthToken=" + mrBean.authToken);
+SessionSilo.logTableMgr.info("SessionAuthToken=" + mrBean.getSessionAuthToken());
+SessionSilo.logTableMgr.info("sessionId=" + mrBean.sessionId);
 SessionSilo.logTableMgr.info("mrBean.hash=" + mrBean.hashCode());
-SessionSilo.logTableMgr.info("mrBean.FeedsHdlr.hash=" + mrBean.FeedsHdlr.hashCode());
-String logIn = mrBean.FeedsHdlr.SessionAuthToken==null?"logIn":"logOut";
+String logIn = mrBean.sessionAuthToken==null?"logIn":"logOut";
 %>
-
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">

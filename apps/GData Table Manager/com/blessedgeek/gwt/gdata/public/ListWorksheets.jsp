@@ -4,18 +4,22 @@ language="java"
 extends="com.blessedgeek.gwt.gdata.server.TableMgrJspBeanable"
 import="
 java.util.List,
-com.google.gdata.data.spreadsheet.WorksheetEntry"
-%><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"
-/>[{"message":"Select a worksheet"}
-<%
+com.google.gdata.data.spreadsheet.WorksheetEntry,
+com.blessedgeek.gwt.gdata.server.SessionSilo,
+com.blessedgeek.gwt.gdata.server.MrBean,
+org.synthful.gdata.SpreadsheetFeedsSilo.WorksheetDescr"
+%>[{"message":"Select a worksheet"}<%
+   
+MrBean mrBean = SessionSilo.initSessionBean(session.getId());
 mrBean.listWorksheets();
-System.out.println("entries=" + mrBean.FeedsHdlr.TableEntries);
+SessionSilo.storeSessionBean(mrBean);
 response.setContentType("text/json");
-for (WorksheetEntry entry : mrBean.FeedsHdlr.WorksheetEntries.toVector())
+for (WorksheetDescr d : mrBean.getWorksheetDescrs().toVector())
 {
-%>,{
-    "worksheet":"<%=entry.getId()%>",
-    "title":"<%=entry.getTitle().getPlainText()%>"
+%>,
+{
+    "worksheet":"<%=d.name%>",
+    "title":"<%=d.name%>"
 }
 <%
 }

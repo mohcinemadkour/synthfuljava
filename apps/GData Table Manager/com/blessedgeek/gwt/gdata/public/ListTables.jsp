@@ -4,18 +4,21 @@ language="java"
 extends="com.blessedgeek.gwt.gdata.server.TableMgrJspBeanable"
 import="
 java.util.List,
-com.google.gdata.data.spreadsheet.TableEntry"
-%><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"
-/>[{"message":"Select a table"}
-<%
+com.google.gdata.data.spreadsheet.TableEntry,
+com.blessedgeek.gwt.gdata.server.SessionSilo,
+com.blessedgeek.gwt.gdata.server.MrBean,
+org.synthful.gdata.SpreadsheetFeedsSilo.TableDescr"
+%>[{"message":"Select a table"}<%
+MrBean mrBean = SessionSilo.initSessionBean(session.getId());
 mrBean.listTables();
-System.out.println("entries=" + mrBean.FeedsHdlr.TableEntries);
+SessionSilo.storeSessionBean(mrBean);
+SessionSilo.logTableMgr.info("entries=" + mrBean.getTableDescrs());
 response.setContentType("text/json");
-for (TableEntry entry : mrBean.FeedsHdlr.TableEntries.toVector())
+for (TableDescr d : mrBean.getTableDescrs().toVector())
 {
 %>,{
-    "table":"<%=entry.getId()%>",
-    "title":"<%=entry.getTitle().getPlainText()%>"
+    "table":"<%=d.title%>",
+    "title":"<%=d.title%>"
 }
 <%
 }

@@ -2,11 +2,15 @@ package org.synthful.gdata;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.synthful.gdata.SpreadsheetFeedsSilo.SpreadsheetDescr;
+import org.synthful.gdata.SpreadsheetFeedsSilo.TableDescr;
+import org.synthful.gdata.SpreadsheetFeedsSilo.WorksheetDescr;
 import org.synthful.gwt.gdata.client.FeedsBaseUrl;
 import org.synthful.util.HashVector;
 
@@ -88,27 +92,25 @@ public class SpreadsheetFeedsHandler
         if (spreadsheetKey==null||spreadsheetKey.length()<5)
             return null;
         
-        SpreadsheetEntry sentry =
-            this.SpreadsheetEntries.get(spreadsheetKey);
-        
-        if (sentry==null)
-            return null;
-        
         return
-            sentry.getWorksheetFeedUrl();
+            getSpreadsheetDescrs().get(spreadsheetKey).worksheetFeedURL;
     }
 
     public void mapDocs(boolean refresh)
     throws IOException, ServiceException
     {
         SpreadsheetFeedsHandler.getSpreadsheetFeed();
-        if (this.SpreadsheetEntries.isEmpty() || refresh)
+        if (this.getSpreadsheetDescrs().isEmpty() || refresh)
         {
             List<SpreadsheetEntry> entries = SpreadsheetFeedsSilo.SpreadsheetFeed.getEntries();
-            this.SpreadsheetEntries.clear();
+            this.getSpreadsheetDescrs().clear();
             
             for(SpreadsheetEntry entry: entries)
-                this.SpreadsheetEntries.put(entry.getKey(), entry);
+            {
+                this.addSpreadsheetDescrs(entry);
+            }
+            
+            this.updated = true;
         }
     }
         
@@ -148,21 +150,8 @@ public class SpreadsheetFeedsHandler
         this.TableRecordsFeedUrl =
             new java.net.URL(
                 this.RecordsFeedUrl.toString() + TableId);
-    }
-
-    /**
-     * Lists the tables currently available in the sheet.
-     * 
-     * @return the list< table entry>
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws ServiceException the service exception
-     */
-    public List<TableEntry> listTables()
-        throws IOException, ServiceException
-    {
-        TableFeed feed = this.getService().getFeed(this.TablesFeedUrl, TableFeed.class);
-        return feed.getEntries();
+        
+        this.updated = true;
     }
 
     /**
@@ -173,17 +162,22 @@ public class SpreadsheetFeedsHandler
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ServiceException the service exception
      */
-    public HashVector<String, TableEntry> mapTables()
+    public HashVector<String, TableDescr> mapTables()
         throws IOException, ServiceException
     {
         TableFeed feed = this.getService().getFeed(this.TablesFeedUrl, TableFeed.class);
         List<TableEntry> entries = feed.getEntries();
-        this.TableEntries.clear();
+        getTableDescrs().clear();
         for(TableEntry entry: entries)
         {
-            this.TableEntries.put(entry.getTitle().getPlainText(), entry);
+            this.getTableDescrs().put(
+                entry.getTitle().getPlainText(),
+                new TableDescr(entry)
+            );
         }
-        return this.TableEntries;
+        
+        this.updated = true;
+        return getTableDescrs();
     }
     
     
@@ -209,6 +203,8 @@ public class SpreadsheetFeedsHandler
         TableEntry newEntry =
             setEntryContentsFromString(new TableEntry(), csNameValuePairs);
         this.getService().insert(this.TablesFeedUrl, newEntry);
+
+        this.updated = true;
     }
 
     /**
@@ -226,7 +222,7 @@ public class SpreadsheetFeedsHandler
      * 
      * @return the table entry
      */
-    private TableEntry setEntryContentsFromString(
+    static private TableEntry setEntryContentsFromString(
         TableEntry entryToUpdate, String csNameValuePairs)
     {
         Map<String, String> dataParams = Maps.newHashMap();
@@ -348,6 +344,8 @@ public class SpreadsheetFeedsHandler
         newWorksheet.setRowCount(rowCount);
         newWorksheet.setColCount(colCount);
         this.getService().insert(this.WorkSheetsFeedUrl, newWorksheet);
+
+        this.updated = true;
     }
     
     public void updateTableEntry(Map<String, String> params)
@@ -357,17 +355,21 @@ public class SpreadsheetFeedsHandler
         if (title==null || title.length()==0)
             return;
         
-        TableEntry entry = this.TableEntries.get(title);
-        if (entry==null)
+        TableDescr descr = getTableDescrs().get(title);
+        if (descr==null)
             return;
-        String pos = "" + this.TableEntries.getKeyPosition(title);
+        String pos = "" + getTableDescrs().getKeyPosition(title);
         URL tableFeedUrl = new URL(this.TablesFeedUrl+pos);
+        TableEntry entry =
+            this.getTableEntry(descr);
 
-        this.entryContentsFromParams(entry, params);
-        //this.TableEntries.remove(entry);
+        entryContentsFromParams(entry, params);
+        //SpreadsheetFeedsSilo.getTableEntries().remove(entry);
         entry = //entry.update();
             this.getService().update(tableFeedUrl, entry);
-        this.TableEntries.put(entry.getTitle().toString(), entry);
+        //getTableDescrs().put(entry.getTitle().toString(), entry);
+        
+        this.updated = true;
     }
 
     public void addNewTableEntry(Map<String, String> params)
@@ -378,7 +380,7 @@ public class SpreadsheetFeedsHandler
         this.getService().insert(this.TablesFeedUrl, newEntry);
     }
 
-    public TableEntry entryContentsFromParams(
+    static public TableEntry entryContentsFromParams(
         TableEntry entryToUpdate, Map<String, String> params)
     {
         Map<String, String> dataParams = Maps.newHashMap();
@@ -462,7 +464,7 @@ public class SpreadsheetFeedsHandler
      * @return the data from params
      */
 
-    public Data dataFromParams(
+    static public Data dataFromParams(
         Data data,
         Map<String, String> dataParams,
         Map<String, String> columnMap)
@@ -519,32 +521,73 @@ public class SpreadsheetFeedsHandler
         return newData;
     }
     
-    public HashVector<String, WorksheetEntry> mapWorksheets()
+    public HashVector<String, WorksheetDescr> mapWorksheets()
     throws IOException, ServiceException
     {
         WorksheetFeed feed = this.getService().getFeed(this.WorkSheetsFeedUrl, WorksheetFeed.class);
         List<WorksheetEntry> entries = feed.getEntries();
-        this.WorksheetEntries.clear();
+        getWorksheetDescrs().clear();
         FeedsSilo.logSpreadsheetFeedsHdlr.info("mapWorksheets: " + entries);
         for(WorksheetEntry entry: entries)
         {
-            this.WorksheetEntries.put(entry.getTitle().getPlainText(), entry);
+            getWorksheetDescrs().put(
+                entry.getTitle().getPlainText(),
+                new WorksheetDescr(entry)
+            );
         }
-        return this.WorksheetEntries;
+        return getWorksheetDescrs();
     }
 
+    public String getSessionAuthToken()
+    {
+        return this.sessionAuthToken;
+    }
+    
+
+    public void addSpreadsheetDescrs(SpreadsheetEntry entry)
+    {
+        this.spreadsheetDescrs.put(
+            entry.getKey(),
+            new SpreadsheetDescr(entry)
+        );
+    }
+    
+    public HashVector<String, SpreadsheetDescr> getSpreadsheetDescrs()
+    {
+        return this.spreadsheetDescrs;
+    }    
+
+    public HashVector<String, WorksheetDescr> getWorksheetDescrs()
+    {
+        return this.worksheetDescrs;
+    }
+    
+    public HashVector<String, TableDescr> getTableDescrs()
+    {
+        return this.tableDescrs;
+    }
+    
+    public TableEntry getTableEntry(TableDescr d)
+    throws IOException, ServiceException
+    {
+        String pos = "" + getTableDescrs().getKeyPosition(d.title);
+        URL tableFeedUrl = new URL(this.TablesFeedUrl+pos);
+        return
+            this.getService().getEntry(tableFeedUrl, TableEntry.class);
+    }
+
+    final public HashVector<String, SpreadsheetDescr> spreadsheetDescrs =
+        new HashVector<String, SpreadsheetDescr>();
+
+    final public HashVector<String, WorksheetDescr> worksheetDescrs =
+        new HashVector<String, WorksheetDescr>();
+
+    final public HashVector<String, TableDescr> tableDescrs =
+        new HashVector<String, TableDescr>();
 
     /** The Sheet feed url str. */
     public String SheetFeedUrlStr;
-
     
-    final public HashVector<String, SpreadsheetEntry> SpreadsheetEntries =
-        new HashVector<String, SpreadsheetEntry>();
-    final public HashVector<String, TableEntry> TableEntries =
-        new  HashVector<String, TableEntry>();
-    final public HashVector<String, WorksheetEntry> WorksheetEntries =
-        new  HashVector<String, WorksheetEntry>();
-
     /** The URL of the record feed for the specified table. */
     public URL TableRecordsFeedUrl;
     

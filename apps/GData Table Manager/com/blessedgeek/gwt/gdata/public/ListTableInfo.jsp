@@ -6,10 +6,13 @@ import="
 java.util.List,
 com.google.gdata.data.spreadsheet.TableEntry,
 com.google.gdata.data.spreadsheet.Data,
-com.google.gdata.data.spreadsheet.Column"
-%><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
+com.google.gdata.data.spreadsheet.Column,
+com.blessedgeek.gwt.gdata.server.SessionSilo,
+com.blessedgeek.gwt.gdata.server.MrBean"
+%>
 <%
-TableEntry entry = mrBean.Table;
+MrBean mrBean = SessionSilo.initSessionBean(session.getId());
+TableEntry entry = mrBean.getTableEntry();
 Data data = entry.getData();
 %>{
 "id":"<%=entry.getId()%>",

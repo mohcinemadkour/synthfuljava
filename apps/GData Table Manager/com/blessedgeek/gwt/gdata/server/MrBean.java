@@ -15,6 +15,9 @@ import javax.servlet.http.HttpSession;
 
 import org.synthful.gdata.SpreadsheetFeedsHandler;
 import org.synthful.gdata.SpreadsheetFeedsSilo;
+import org.synthful.gdata.SpreadsheetFeedsSilo.SpreadsheetDescr;
+import org.synthful.gdata.SpreadsheetFeedsSilo.TableDescr;
+import org.synthful.gdata.SpreadsheetFeedsSilo.WorksheetDescr;
 import org.synthful.util.HashVector;
 
 import com.blessedgeek.gwt.gdata.client.Actions;
@@ -29,6 +32,7 @@ import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
 public class MrBean
+extends SpreadsheetFeedsHandler
 implements Serializable
 {
     /**
@@ -38,6 +42,9 @@ implements Serializable
 
     public MrBean()
     {
+        super(
+            new SpreadsheetService("Table Manager")
+        );
     }
 
     public String readAuthToken(
@@ -52,22 +59,23 @@ implements Serializable
             // AuthSubUtil.getTokenFromReply(request.getQueryString());
             // System.out.println("authToken0=" + authToken0);
 
-            this.AuthToken = authToken;
+            this.authToken = authToken;
             try
             {
-                if (this.FeedsHdlr.getService()==null)
+                if (this.getService()==null)
                     SpreadsheetFeedsSilo.SpreadsheetService =
                         new SpreadsheetService("Table Manager");
                 
-                this.FeedsHdlr.authenticateSession(authToken, this.authKey);
-                SessionSilo.logMrBean.info("SessionAuthToken=" + this.FeedsHdlr.SessionAuthToken);
+                this.authenticateSession(authToken, this.authKey);
+                SessionSilo.logMrBean.info("SessionAuthToken=" + this.sessionAuthToken);
                 SpreadsheetFeedsSilo.initSpreadsheetFeed(true);
                 //if (this.FeedsHdlr.SessionAuthToken!=null)
                 //    this.AuthToken = null;
-                SessionSilo.logMrBean.info("SessionAuthToken=" + this.FeedsHdlr.SessionAuthToken);
+                SessionSilo.logMrBean.info("SessionAuthToken=" + this.sessionAuthToken);
                 SessionSilo.logMrBean.info("hash=" + this.hashCode());
-                SessionSilo.logMrBean.info("FeedsHdlr hash=" + this.FeedsHdlr.hashCode());
-                return this.FeedsHdlr.SessionAuthToken;
+                
+                this.updated = true;
+                return this.sessionAuthToken;
             }
             catch (AuthenticationException e)
             {
@@ -98,49 +106,36 @@ implements Serializable
         }
         return authToken;
     }
-
-    static public boolean logTokenInfo(
-        String token, java.security.PrivateKey key)
+    
+    public boolean revokeSessionAuth()
     {
-        SessionSilo.logMrBean.info("token:" + token);
-        if (token == null)
-        {
-            SessionSilo.logMrBean.info("No token info: Token is null.");
-            return false;
-        }
-
-        try
-        {
-            Map<String, String> tokenInfo =
-                AuthSubUtil.getTokenInfo(token, key);
-            SessionSilo.logMrBean.info("tokenInfo:" + tokenInfo);
-            for (Map.Entry<String, String> info : tokenInfo.entrySet())
-            {
-                SessionSilo.logMrBean.info
-                    (info.getKey() + ':' + info.getValue());
-            }
-
+        try{
+            AuthSubUtil.revokeToken(this.sessionAuthToken,null);
+            this.sessionAuthToken = null;
+            this.authToken = null;
+            this.updated = true;
+            
             return true;
-        }
-        catch (Exception e)
-        {
-            SessionSilo.logMrBean.info(e.toString());
-            return false;
-        }
+           }
+           catch (Exception ex)
+           {
+               return false;
+           }        
     }
 
-    public HashVector<String, SpreadsheetEntry> listDocs(boolean refresh)
+
+    public HashVector<String, SpreadsheetDescr> listDocs(boolean refresh)
     {
         try
         {
-            this.FeedsHdlr.mapDocs(refresh);
+            this.mapDocs(refresh);
         }
         catch (Exception e)
         {
             SessionSilo.logMrBean.info(e.toString());
         }
         
-        return this.FeedsHdlr.SpreadsheetEntries;
+        return getSpreadsheetDescrs();
     }
 
     public void setSheetDoc(
@@ -148,7 +143,7 @@ implements Serializable
     {
         try
         {
-            this.FeedsHdlr.setDoc(sheetKey);
+            this.setDoc(sheetKey);
         }
         catch (IOException e)
         {
@@ -156,12 +151,12 @@ implements Serializable
         }
     }
 
-    public HashVector<String, TableEntry> listTables()
+    public HashVector<String, TableDescr> listTables()
     {
         try
         {
-            this.FeedsHdlr.mapTables();
-            return this.FeedsHdlr.TableEntries;
+            this.mapTables();
+            return getTableDescrs();
         }
         catch (Exception e)
         {
@@ -174,19 +169,21 @@ implements Serializable
         String title)
         throws MalformedURLException
     {
-        this.Table = this.FeedsHdlr.TableEntries.get(title);
-        String pos = "" + this.FeedsHdlr.TableEntries.getKeyPosition(title);
+        this.setTable(getTableDescrs().get(title));
+        String pos = "" + getTableDescrs().getKeyPosition(title);
 
-        String recordsFeedUrlStr = this.FeedsHdlr.RecordsFeedUrl + pos;
-        this.FeedsHdlr.TableRecordsFeedUrl = new URL(recordsFeedUrlStr);
+        String recordsFeedUrlStr = this.RecordsFeedUrl + pos;
+        this.TableRecordsFeedUrl = new URL(recordsFeedUrlStr);
+        
+        this.updated = true;
     }
 
-    public HashVector<String, WorksheetEntry> listWorksheets()
+    public HashVector<String, WorksheetDescr> listWorksheets()
     {
         try
         {
-            this.FeedsHdlr.mapWorksheets();
-            return this.FeedsHdlr.WorksheetEntries;
+            this.mapWorksheets();
+            return getWorksheetDescrs();
         }
         catch (Exception e)
         {
@@ -199,7 +196,8 @@ implements Serializable
         String title)
         throws MalformedURLException
     {
-        this.Worksheet = this.FeedsHdlr.WorksheetEntries.get(title);
+        this.Worksheet = getWorksheetDescrs().get(title);
+        this.updated = true;
     }
     
     public String setSessionId(HttpSession sess)
@@ -215,7 +213,7 @@ implements Serializable
     public void listRecords()
         throws IOException, ServiceException
     {
-        List<RecordEntry> entries = this.FeedsHdlr.listAllRecordEntries();
+        List<RecordEntry> entries = this.listAllRecordEntries();
         for (RecordEntry entry : entries)
         {
             for (Field field : entry.getFields())
@@ -226,22 +224,39 @@ implements Serializable
         }
     }
 
-    final public SpreadsheetFeedsHandler FeedsHdlr =
-        new SpreadsheetFeedsHandler(
-            new SpreadsheetService("Table Manager")
-        );
+    public TableEntry getTableEntry()
+    {
+        try {            
+            return this.getTableEntry(this.table);
+        }
+        catch (Exception e)
+        {
+            SessionSilo.logMrBean.warning(e.toString());
+            return null;
+        }
+    }
 
     public Actions action;
 
-    public String AuthToken;
+    public String authToken;
 
     public String SpreadsheetKey;
 
-    public TableEntry Table;
+    public TableDescr getTable()
+    {
+        return this.table;
+    }
     
-    public WorksheetEntry Worksheet;
+    public void setTable(TableDescr t)
+    {
+        this.table = t;
+    }
+    
+    public WorksheetDescr Worksheet;
+    
+    public TableDescr table;
 
-    public List<RecordEntry> ResultRecords;
+    //public List<RecordEntry> ResultRecords;
 
     public PrivateKey authKey;
     

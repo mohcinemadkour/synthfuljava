@@ -41,20 +41,22 @@ implements Serializable
     public void authenticateSession(String authToken, PrivateKey key)
     throws AuthenticationException, IOException, GeneralSecurityException
     {
-        this.SessionAuthToken =
+        this.sessionAuthToken =
             AuthSubUtil.exchangeForSessionToken(authToken, key);
 
-        FeedsSilo.logFeedsHdlr.info("SessionAuthToken=" + this.SessionAuthToken);
+        FeedsSilo.logFeedsHdlr.info("SessionAuthToken=" + this.sessionAuthToken);
         FeedsSilo.logFeedsHdlr.info("service=" + this.getService());
-        this.getService().setAuthSubToken(this.SessionAuthToken);
+        this.getService().setAuthSubToken(this.sessionAuthToken);
+        this.updated = true;
         FeedsSilo.logFeedsHdlr.info("service=" + this.getService());
     }
 
     public void restoreSessionAuth(String sessionAuthToken)
     throws AuthenticationException, IOException, GeneralSecurityException
     {
-        this.SessionAuthToken = sessionAuthToken;
-        this.getService().setAuthSubToken(this.SessionAuthToken);
+        this.sessionAuthToken = sessionAuthToken;
+        this.getService().setAuthSubToken(this.sessionAuthToken);
+        this.updated = true;
     }
 
     public void setDoc(
@@ -62,14 +64,18 @@ implements Serializable
         throws IOException
     {
         this.CurrentDocKey = docKey;
+        this.updated = true;
     }
     
     abstract public GoogleService getService();
+    
+    public boolean isUpdated() {return this.updated;};
 
     /** Base feed url of spreadsheets to use to construct record feed urls. */
     final static public String BaseFeedUrlStr = "";
 
-    public String SessionAuthToken;
+    public String sessionAuthToken;
     public URL ListDocsFeedUrl;
     public String CurrentDocKey;
+    protected boolean updated;
 }

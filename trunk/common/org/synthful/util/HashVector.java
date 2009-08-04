@@ -6,6 +6,7 @@
  */
 package org.synthful.util;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Hashtable;
 import java.util.Map;
@@ -17,7 +18,7 @@ import org.synthful.util.ToStringBuffer.ToStringBufferable;
 
 public class HashVector<K,V>
 extends Hashtable<K,V>
-implements ToStringBufferable, EmptyFactory
+implements ToStringBufferable, EmptyFactory, Serializable
 {
     
     /**

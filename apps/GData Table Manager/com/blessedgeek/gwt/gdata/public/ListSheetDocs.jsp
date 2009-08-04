@@ -4,17 +4,18 @@ language="java"
 extends="com.blessedgeek.gwt.gdata.server.TableMgrJspBeanable"
 import="
 java.util.List,
-com.google.gdata.data.spreadsheet.SpreadsheetEntry"
-%><jsp:useBean id="mrBean" class="com.blessedgeek.gwt.gdata.server.MrBean" scope="session"/>
-[{"message":"Select a document"}
-<%
-System.out.println("entries=" + mrBean.FeedsHdlr.SpreadsheetEntries);
+com.google.gdata.data.spreadsheet.SpreadsheetEntry,
+com.blessedgeek.gwt.gdata.server.SessionSilo,
+com.blessedgeek.gwt.gdata.server.MrBean,
+org.synthful.gdata.SpreadsheetFeedsSilo.SpreadsheetDescr"
+%>[{"message":"Select a document"}<%
+MrBean mrBean = SessionSilo.initSessionBean(session.getId());
 response.setContentType("text/json");
-for (SpreadsheetEntry entry : mrBean.FeedsHdlr.SpreadsheetEntries.toVector())
+for (SpreadsheetDescr entry : mrBean.getSpreadsheetDescrs().toVector())
 {
 %>,{
-    "key":"<%=entry.getKey()%>",
-    "title":"<%=entry.getTitle().getPlainText()%>"
+    "key":"<%=entry.key%>",
+    "title":"<%=entry.title%>"
 }
 <%
 }
