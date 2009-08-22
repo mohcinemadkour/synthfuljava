@@ -1,24 +1,17 @@
 package com.blessedgeek.gwt.gdata.server;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.cache.Cache;
-import javax.cache.CacheEntry;
 import javax.cache.CacheException;
 import javax.cache.CacheFactory;
 import javax.cache.CacheManager;
 
-import org.synthful.util.HashVector;
-
 import com.google.appengine.api.memcache.stdimpl.GCacheFactory;
 import com.google.gdata.client.http.AuthSubUtil;
-import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
-import com.google.gdata.data.spreadsheet.TableEntry;
-import com.google.gdata.data.spreadsheet.WorksheetEntry;
 
 public class SessionSilo
 {
@@ -128,6 +121,22 @@ public class SessionSilo
             return (MrBean)o;
         
         return null;
+    }
+    
+    static public MrBean removeBean(String key)
+    {
+        if (beanCache==null)
+            return null;
+        Object o = beanCache.remove(key);
+        
+        if (o==null)
+            return null;
+        
+        if (o instanceof MrBean)
+            return (MrBean)o;
+        
+        return null;
+        
     }
     
     static public boolean containsKey(Serializable key)

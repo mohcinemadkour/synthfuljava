@@ -53,7 +53,7 @@ String logIn = mrBean.sessionAuthToken==null?"logIn":"logOut";
 
     <table align="center">
       <tr>
-        <td id="<%=logIn%>"></td>        
+        <td id="<%=logIn%>"></td>
       </tr>
       <tr><td><hr/></td></tr>
       <tr>

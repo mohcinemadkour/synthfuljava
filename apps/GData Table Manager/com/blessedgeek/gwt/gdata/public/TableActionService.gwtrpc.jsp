@@ -1,6 +1,4 @@
-<%
-    out = this.shuntJspOutput(pageContext);
-%><%@
+<%@
 page language="java"
  extends="com.blessedgeek.gwt.gdata.server.TableMgrServiceImplJspBeanable"
  import="

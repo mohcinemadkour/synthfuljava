@@ -11,7 +11,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  * TODO: Suggest to google that the servlet path should be
  * a parameter in rpc interface.
  */
-@RemoteServiceRelativePath("TableActionService.jsp")
+@RemoteServiceRelativePath("TableActionService.gwtrpc.jsp")
 public interface TableMgrService
     extends HashedParameterService
 {
