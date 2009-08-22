@@ -42,21 +42,6 @@ abstract public class JspServiceBeanable
     protected JspResponseWriter jspOut = new JspResponseWriter();
     protected boolean isGWTRPCService;
     protected boolean bodyNeedsPopping;
-
-    protected JspResponseWriter _shuntJspOutput(PageContext pageContext)
-    {
-        this.jspContext = pageContext;
-        try {
-            this.jspOut.clearBuffer();
-        }
-        catch(Exception e)
-        {
-            this.jspOut = new JspResponseWriter();
-        }
-        
-        pageContext.pushBody(this.jspOut);
-        return jspOut;
-    }
     
     protected String doJspService(HashMap<String, String> parameters)
     {
