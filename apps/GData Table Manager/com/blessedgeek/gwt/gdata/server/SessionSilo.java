@@ -27,6 +27,15 @@ public class SessionSilo
     final static public Logger logTableMgr =
         Logger.getLogger("TableMgr");
 
+    /**
+     * Create new instance of static cache, beanCache.
+     * GAE memcache is configurable thro certain reserved keys.
+     * A reserved key and its value can be injected into the
+     * cache thro a hashmap.
+     * If a config hashmap is not injected into the cache,
+     * the cache would take on default values.
+     * 
+     */
     static public void initBeanCache()
     {
         if (beanCache!=null)
@@ -44,6 +53,10 @@ public class SessionSilo
         }
     }
     
+    /**
+     * Call this at start of a JSP to get the session bean
+     * If bean does not exist, create and put it in the cache.
+     */
     static public MrBean initSessionBean(String sessId)
     {
         MrBean mrBean = getBean(sessId);
@@ -57,6 +70,15 @@ public class SessionSilo
         return mrBean;
     }
     
+    /**
+     * Call this at the end of a JSP.
+     * If any routine updates the bean,
+     * those routines would need to set updated flag to true.
+     * If updated is true, then put the bean back into cache
+     * to over-write its existing blob in the cache.
+     * 
+     * @param mrBean
+     */
     static public void storeSessionBean(MrBean mrBean)
     {
         if(mrBean.isUpdated())
