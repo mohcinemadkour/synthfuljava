@@ -15,8 +15,8 @@ import org.synthful.util.ToStringBuffer.ToStringBufferable;
 /**
  * VectorNode Class.
  */
-public class VectorNode
-extends Vector
+public class VectorNode<E>
+extends Vector<E>
 implements TreeNode, ToStringBufferable
 {
     
@@ -77,10 +77,45 @@ implements TreeNode, ToStringBufferable
 	 * @param o
 	 */
     public VectorNode (Object[] o)
+	{
+		super(o.length);
+		this.add(o);
+	}
+    
+    public VectorNode<E> add (Object[] o)
     {
-        super (o.length);
-        for (int i = 0; i < o.length; i++)
-            add (o[i]);
+		for (int i = 0; i < o.length; i++)
+			try
+			{
+				add((E) o[i]);
+			}
+			catch (Exception e)
+			{}
+			
+    	return this;
+    }
+    
+    /**
+	 * Adds the.
+	 * 
+	 * @param keylevel
+	 * @param key
+	 * @param value
+	 * 
+	 * @return Adds the as VectorNode
+	 */
+    public VectorNode<E> add (int keylevel, int[] key, Object value)
+    {
+        if (keylevel >= key.length || keylevel < 0)
+            return null;
+        
+        Object o
+        = (keylevel == key.length - 1)
+        ? value
+        : new VectorNode ().add (keylevel + 1, key, value);
+        ;
+        
+        return this;
     }
     
     /**
@@ -116,29 +151,6 @@ implements TreeNode, ToStringBufferable
             return ( (VectorNode) o).get (keylevel + 1, key);
         
         return o;
-    }
-    
-    /**
-	 * Adds the.
-	 * 
-	 * @param keylevel
-	 * @param key
-	 * @param value
-	 * 
-	 * @return Adds the as VectorNode
-	 */
-    public VectorNode add (int keylevel, int[] key, Object value)
-    {
-        if (keylevel >= key.length || keylevel < 0)
-            return null;
-        
-        Object o
-        = (keylevel == key.length - 1)
-        ? value
-        : new VectorNode ().add (keylevel + 1, key, value);
-        ;
-        
-        return this;
     }
     
     /* (non-Javadoc)
@@ -197,9 +209,9 @@ implements TreeNode, ToStringBufferable
 	 * 
 	 * @return this.
 	 */
-    public VectorNode fromString (String s, char cSeparator)
+    public VectorNode<E> fromString (String s, char cSeparator)
     {
-        fromString (s, "[" + cSeparator + ']');
+        this.fromString (s, "[" + cSeparator + ']');
         return this;
     }
     
@@ -219,15 +231,12 @@ implements TreeNode, ToStringBufferable
 	 *         If set false, any null segment encountered will create a vector
 	 *         cell with a blank string.
 	 */
-    public VectorNode fromString (String s, String sSeparator)
+    public VectorNode<E> fromString (String s, String sSeparator)
     {
         if (s == null)
             return this;
         String[] ss = s.split (sSeparator);
-        for (int i = 0; i < ss.length; i++)
-            add (ss[i]);
-        
-        return this;
+        return add (ss);
     }
     
     /**
@@ -274,4 +283,7 @@ implements TreeNode, ToStringBufferable
     
     /** Variable ParentNode. */
     protected TreeNode ParentNode;
+    
+    private E eVar;
+    private Class<E> eClass;
 }

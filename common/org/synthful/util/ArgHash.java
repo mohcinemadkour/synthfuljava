@@ -6,14 +6,14 @@
  */
 package org.synthful.util;
 
-import org.synthful.util.HashTreeNode;
+import org.synthful.util.HashVector;
 import org.synthful.util.VectorNode;
 
 /**
  * ArgHash Class.
  */
 public class ArgHash
-	extends HashTreeNode
+	extends HashVector
 {
 	
 	/**
@@ -49,7 +49,7 @@ public class ArgHash
 	 */
 	public ArgHash setRequiredArgs(String[][] argkeys)
 	{
-		RequiredArgs = new HashTreeNode(argkeys);
+		RequiredArgs = new HashVector(argkeys);
 
 		return this;
 	}
@@ -63,7 +63,7 @@ public class ArgHash
 	 */
 	public ArgHash setOptionalArgs(String[][] argkeys)
 	{
-		OptionalArgs = new HashTreeNode(argkeys);
+		OptionalArgs = new HashVector(argkeys);
 		return this;
 	}
 
@@ -76,7 +76,7 @@ public class ArgHash
 	 */
 	public VectorNode verifyRequiredArgs(String[][] argkeys)
 	{
-		RequiredArgs = new HashTreeNode(argkeys);
+		RequiredArgs = new HashVector(argkeys);
 		AbsentArgs = new VectorNode();
 
 		for (int i = 0; i < RequiredArgs.size(); i++)
@@ -99,7 +99,7 @@ public class ArgHash
 		return "" + ListArgs(RequiredArgs) + ListArgs(OptionalArgs);
 	}
 
-	static private StringBuffer ListArgs(HashTreeNode h)
+	static private StringBuffer ListArgs(HashVector h)
 	{
 		StringBuffer sb = new StringBuffer();
 		if (h != null)
@@ -116,9 +116,9 @@ public class ArgHash
 		return sb;
 	}
 
-	protected HashTreeNode RequiredArgs;
+	protected HashVector RequiredArgs;
 	
-	protected HashTreeNode OptionalArgs;
+	protected HashVector OptionalArgs;
 	
 	protected VectorNode AbsentArgs;
 }
