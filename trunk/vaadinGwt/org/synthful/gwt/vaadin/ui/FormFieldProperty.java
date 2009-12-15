@@ -68,7 +68,7 @@ abstract public class FormFieldProperty
 	
 	public Object getValue()
 	{
-		Object o = getValue();
+		Object o = super.getValue();
 		return (o==null)?this.defaultValue: o;
 	}
 	
