@@ -14,6 +14,7 @@ import org.synthful.util.ToStringBuffer.ToStringBufferable;
 
 /**
  * VectorNode Class.
+ * This allows constructing tree based on vector nodes.
  */
 public class VectorNode<E>
 extends Vector<E>
@@ -23,7 +24,7 @@ implements TreeNode, ToStringBufferable
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = 3717515568044106572L;
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Instantiates a new VectorNode.
@@ -109,11 +110,14 @@ implements TreeNode, ToStringBufferable
         if (keylevel >= key.length || keylevel < 0)
             return null;
         
+        //todo: Something's wrong here. new vectornode is not used
+        //there should be a for loop to traverse until reaches the specified
+        //key level then insert new vectornode or value into that.
         Object o
-        = (keylevel == key.length - 1)
-        ? value
-        : new VectorNode ().add (keylevel + 1, key, value);
-        ;
+	        = (keylevel == key.length - 1)
+	        ? value
+	        : new VectorNode<E> ().add (keylevel + 1, key, value);
+	        ;
         
         return this;
     }
@@ -147,8 +151,8 @@ implements TreeNode, ToStringBufferable
         if (keylevel == key.length - 1)
             return o;
         
-        if (o instanceof VectorNode)
-            return ( (VectorNode) o).get (keylevel + 1, key);
+        if (o.getClass().isInstance(this) )
+            return ( (VectorNode<E>) o).get (keylevel + 1, key);
         
         return o;
     }

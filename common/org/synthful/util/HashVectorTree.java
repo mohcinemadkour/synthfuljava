@@ -3,7 +3,7 @@ package org.synthful.util;
 import java.util.Map;
 
 public class HashVectorTree
-extends HashVector
+extends HashVectorTreeNode
 {
 	/**
 	 * 
@@ -101,7 +101,7 @@ extends HashVector
 	 *         Algorithm uses iteration rather than recursion to progress from
 	 *         one dot level to the next.
 	 */   
-    public HashVector put (String key, Object value)
+    public HashVectorTreeNode put (String key, Object value)
     {
     	return this.put(key, this.getKeyDelimiter(), value);
     }
@@ -147,8 +147,8 @@ extends HashVector
 	 * @return the HashTreeNode indicated by key sequence, or null if path does
 	 *         not exist and overWriteLeaf is false.
      */
-	public HashVector setPath(
-		HashVector hashTreeNode,
+	public HashVectorTreeNode setPath(
+		HashVectorTreeNode hashTreeNode,
 		String keyStr,
 		boolean overWriteLeaf)
 	{
