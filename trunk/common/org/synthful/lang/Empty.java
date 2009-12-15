@@ -32,4 +32,5 @@ public class Empty
 	    return 0;
 	}
 
+	final static public String Blank = "";
 }

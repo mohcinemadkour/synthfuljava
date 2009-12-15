@@ -26,6 +26,7 @@ import com.google.gdata.data.spreadsheet.RecordEntry;
 import com.google.gdata.data.spreadsheet.TableEntry;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
+import com.google.gdata.client.http.GoogleGDataRequest;
 
 public class MrBean
 extends SpreadsheetFeedsHandler

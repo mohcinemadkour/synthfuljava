@@ -9,11 +9,9 @@
 
 package org.synthful.util;
 
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.synthful.lang.Empty;
 import org.synthful.lang.Empty.EmptyFactory;
 
 /**

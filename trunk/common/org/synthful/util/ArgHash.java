@@ -6,16 +6,20 @@
  */
 package org.synthful.util;
 
-import org.synthful.util.HashVector;
-import org.synthful.util.VectorNode;
+import org.synthful.lang.Empty;
 
 /**
  * ArgHash Class.
  */
 public class ArgHash
-	extends HashVector
+	extends HashVectorTree
 {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Instantiates a new ArgHash.
 	 * 
@@ -24,19 +28,67 @@ public class ArgHash
 	 */
 	public ArgHash(String[] args)
 	{
+		this.setKeyDelimiter('.');
+		this.eatArgs(args, false);
+	}
+	
+	/**
+	 * Instantiates a new ArgHash.
+	 * 
+	 * @param args
+	 *            of the format key=value pair
+	 * @param keyDelimiter
+	 * 		Facilitates storage of hierarchical arguments. e.g.,<br>
+	 * 		argA.cfg.path=path1 -> keyDelimiter is '.'<br>
+	 * 		argA:cfg:path=path1 -> keyDelimiter is ':'<br>
+	 */
+	public ArgHash(String[] args, char keyDelimiter)
+	{
+		this.setKeyDelimiter(keyDelimiter);
+		this.eatArgs(args, false);
+	}
+	
+	/**
+	 * Instantiates a new ArgHash.
+	 * 
+	 * @param args
+	 *            of the format key=value pair
+	 * @param keyDelimiter
+	 * 		Facilitates storage of hierarchical arguments. e.g.,<br>
+	 * 		argA.cfg.path=path1 -> keyDelimiter is '.'<br>
+	 * 		argA:cfg:path=path1 -> keyDelimiter is ':'<br>
+	 * 
+	 * @param multivalueDelimiter
+	 * 		argA.names=ramu,jeya,amad -> multivalueDelimiter is ','<br>
+	 */
+	public ArgHash(String[] args, char keyDelimiter, char multivalueDelimiter)
+	{
+		this.MultivalueDelimiter = ""+multivalueDelimiter;
+		this.setKeyDelimiter(keyDelimiter);
+		this.eatArgs(args, true);
+	}
+	
+	public void eatArgs(String[] args, boolean multivalue)
+	{
 		for (int i = 0; i < args.length; i++)
 		{
-			String[] arg = args[i].split("=");
+			String[] arg = args[i].split(this.KeyValueSeparator);
 			if (arg == null || arg.length == 0)
 				continue;
 			String argkey = arg[0];
 
 			String argval
 				= (arg.length <= 1)
-				? null
+				? Empty.String
 				: arg[1];
-
-			put(arg[0], arg[1]);
+			
+			if (multivalue && argval!=Empty.String)
+			{
+				String[] argvals = arg[1].split(this.MultivalueDelimiter);
+				this.put(argkey, argvals);
+			}
+			else
+				this.put(argkey, argval);
 		}
 	}
 
@@ -49,7 +101,7 @@ public class ArgHash
 	 */
 	public ArgHash setRequiredArgs(String[][] argkeys)
 	{
-		RequiredArgs = new HashVector(argkeys);
+		RequiredArgs = new HashVectorTreeNode(argkeys);
 
 		return this;
 	}
@@ -63,7 +115,7 @@ public class ArgHash
 	 */
 	public ArgHash setOptionalArgs(String[][] argkeys)
 	{
-		OptionalArgs = new HashVector(argkeys);
+		OptionalArgs = new HashVectorTreeNode(argkeys);
 		return this;
 	}
 
@@ -74,14 +126,14 @@ public class ArgHash
 	 * 
 	 * @return missing required arg keys as VectorNode
 	 */
-	public VectorNode verifyRequiredArgs(String[][] argkeys)
+	public VectorNode<String> verifyRequiredArgs(String[][] argkeys)
 	{
-		RequiredArgs = new HashVector(argkeys);
-		AbsentArgs = new VectorNode();
+		RequiredArgs = new HashVectorTreeNode(argkeys);
+		AbsentArgs = new VectorNode<String>();
 
 		for (int i = 0; i < RequiredArgs.size(); i++)
 		{
-			Object k = RequiredArgs.getKey(i);
+			String k = RequiredArgs.getKey(i);
 			if (k != null && !containsKey(k))
 				AbsentArgs.add(k);
 		}
@@ -99,7 +151,7 @@ public class ArgHash
 		return "" + ListArgs(RequiredArgs) + ListArgs(OptionalArgs);
 	}
 
-	static private StringBuffer ListArgs(HashVector h)
+	static private StringBuffer ListArgs(HashVectorTreeNode h)
 	{
 		StringBuffer sb = new StringBuffer();
 		if (h != null)
@@ -116,9 +168,15 @@ public class ArgHash
 		return sb;
 	}
 
-	protected HashVector RequiredArgs;
+	protected HashVectorTreeNode RequiredArgs;
 	
-	protected HashVector OptionalArgs;
+	protected HashVectorTreeNode OptionalArgs;
 	
-	protected VectorNode AbsentArgs;
+	protected VectorNode<String> AbsentArgs;
+	
+	protected String MultivalueDelimiter = ",";
+	
+	protected String KeyValueSeparator = "=";
+	
+	protected String ArgumentSeparator = " ";
 }
