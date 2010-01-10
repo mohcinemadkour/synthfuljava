@@ -14,6 +14,11 @@ final public class PersistenceManagerFactorySingleton
 	private PersistenceManagerFactorySingleton()
 	{}
 
+	public static PersistenceManager getPersistenceManager()
+	{
+		return pmfInstance.getPersistenceManager();
+	}
+
 	public static PersistenceManagerFactory get()
 	{
 		return pmfInstance;

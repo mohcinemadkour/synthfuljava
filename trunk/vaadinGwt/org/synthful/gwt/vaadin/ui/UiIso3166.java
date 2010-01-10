@@ -38,8 +38,7 @@ public class UiIso3166
 			item.getItemProperty(iso3166_PROPERTY_NAME).setValue(name);
 			item.getItemProperty(iso3166_PROPERTY_SHORT).setValue(id);
 			item.getItemProperty(iso3166_PROPERTY_FLAG).setValue(
-				new ThemeResource("../sampler/flags/"
-					+ id.toLowerCase() + ".gif"));
+				new ThemeResource("flags/" + id.toLowerCase() + ".gif"));
 		}
 		
 		container.sort(

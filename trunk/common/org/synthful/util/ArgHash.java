@@ -79,10 +79,10 @@ public class ArgHash
 
 			String argval
 				= (arg.length <= 1)
-				? Empty.String
+				? Empty.Blank
 				: arg[1];
 			
-			if (multivalue && argval!=Empty.String)
+			if (multivalue && argval!=Empty.Blank)
 			{
 				String[] argvals = arg[1].split(this.MultivalueDelimiter);
 				this.put(argkey, argvals);
