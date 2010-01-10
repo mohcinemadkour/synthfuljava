@@ -24,7 +24,7 @@ public class NumericConversions
     public static final String fromBinaryArrayToString(
         boolean[] binArray)
     {
-        if (binArray == null) return Empty.String;
+        if (binArray == null) return Empty.Blank;
         return fromBinaryArrayToStringBuffer(binArray).toString();
     }
 

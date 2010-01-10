@@ -6,31 +6,44 @@
  */
 package org.synthful.lang;
 
-public class Empty
+public class Empty<T>
 {
-	static public interface EmptyFactory
+	static public interface EmptyFactory<W>
 	{
 	  Empty EMPTY = new Empty();
 	}
 	
 	public Empty(){}
-    
-    static final public String String = "";
-
-	public String toString()
+	
+	public Empty(T t)
 	{
-		return String;
+		this.value = t;
 	}
 
-	final public Object toValue()
+    
+	public String toString()
 	{
-		return null;
+		return Blank;
+	}
+
+	final public T toValue()
+	{
+		return this.value;
 	}
 	
 	final public int toInt()
 	{
 	    return 0;
 	}
+	
+	private T value;
+
+	final static public <U> Empty<U> init(U u)
+	{
+		Empty<U> EMPTY = new Empty<U>(u);
+		return EMPTY;
+	}
 
 	final static public String Blank = "";
+	
 }
