@@ -85,11 +85,8 @@ implements Serializable
 	}
 
 	static public
-		ResourceDescriptor exists(String name)
+		ResourceDescriptor exists(PersistenceManager pm, String name)
 	{
-		PersistenceManager pm =
-			PersistenceManagerFactorySingleton.getPersistenceManager();
-
 		Query query = pm.newQuery(String.class);
 		query.setFilter("name == nameParam");
 		query.declareParameters("String nameParam");

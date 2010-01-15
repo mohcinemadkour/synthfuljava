@@ -55,11 +55,8 @@ implements Serializable
 	}
 	
 	static public
-	TextResourceContent exists(String name)
+	TextResourceContent exists(PersistenceManager pm, String name)
 	{
-		PersistenceManager pm =
-			PersistenceManagerFactorySingleton.getPersistenceManager();
-	
 		Query query = pm.newQuery(String.class);
 		query.setFilter("id == idParam");
 		query.declareParameters("String idParam");
