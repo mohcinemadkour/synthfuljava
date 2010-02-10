@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='blessed'>
+  <inherits name='com.google.gwt.user.User'/>
+  <inherits name='org.synthful.gwt.http.servlet.OriginServerCall'/>
+  <inherits name='com.google.gwt.user.theme.standard.Standard'/>
+  <entry-point class='com.blessedgeek.gwt.examples.greet.client.Z'/>
+  <source path='client'/>
+</module>

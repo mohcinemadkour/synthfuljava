@@ -1,0 +1,21 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		.important {
+			font-weight: bold;
+		}
+	</ui:style>
+	<g:DialogBox ui:field="dialogBox"
+	 text="Remote Procedure Call"
+	 animationEnabled="true"
+	 >
+		<g:VerticalPanel horizontalAlignment="ALIGN_RIGHT">
+			<g:Label>Sending name to the server:</g:Label>
+			<g:Label ui:field="textToServerLabel"/>
+			<g:Label>Server replies:</g:Label>
+			<g:HTML ui:field="serverResponseLabel"/>
+			<g:Button ui:field="closeButton" text="Close"/>
+		</g:VerticalPanel>
+	</g:DialogBox>
+</ui:UiBinder> 

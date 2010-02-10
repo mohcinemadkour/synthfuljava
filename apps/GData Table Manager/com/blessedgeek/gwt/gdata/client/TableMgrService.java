@@ -1,6 +1,9 @@
 package com.blessedgeek.gwt.gdata.client;
 
+import java.util.Map;
+
 import org.synthful.gwt.http.servlet.client.HashedParameterService;
+import org.synthful.gwt.http.servlet.client.ParameterService;
 
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -13,6 +16,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("TableActionService.gwtrpc.jsp")
 public interface TableMgrService
-    extends HashedParameterService
+extends ParameterService<String, Map<String, String>>
 {
 }
