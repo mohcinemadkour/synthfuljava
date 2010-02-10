@@ -10,7 +10,7 @@ public class Empty<T>
 {
 	static public interface EmptyFactory<W>
 	{
-	  Empty EMPTY = new Empty();
+	  Empty<?> EMPTY = new Empty();
 	}
 	
 	public Empty(){}
