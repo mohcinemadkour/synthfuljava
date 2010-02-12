@@ -111,10 +111,10 @@ public class Z
 		serverResponseLabel.setText("");
 		sendButton.setEnabled(false);
 		
-		greetingService.doServiceResponse(params,serverCallBack);
+		greetingService.doServiceResponse(params,callBack);
 	}
 	
-	private final AsyncCallback<Map<String, String>> serverCallBack =
+	private final AsyncCallback<Map<String, String>> callBack =
 		new AsyncCallback<Map<String, String>>()
 		{
 			public void onFailure(Throwable caught){
