@@ -95,9 +95,6 @@ public class Z
 		uiBinder.createAndBindUi(this);
 		nameField.setText("GWT User");
 
-		// We can add style names to widgets
-		sendButton.addStyleName("sendButton");
-
 		// Add the nameField and sendButton to the RootPanel
 		RootPanel.get("here").add(hPanel);
 

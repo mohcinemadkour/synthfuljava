@@ -2,13 +2,15 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
-		.important {
-			font-weight: bold;
+		.sendButton {
+		  display: block;
+		  color: blue;
+		  font-size: 16pt;
 		}
 	</ui:style>
 	<g:VerticalPanel>
 		<g:HorizontalPanel ui:field="hPanel">
-			<g:Button ui:field="sendButton" text="Send" />
+			<g:Button styleName="{style.sendButton}" ui:field="sendButton" text="Send" />
 			<g:TextBox ui:field="nameField" text="GWT User" />
 		</g:HorizontalPanel>
 		<g:DialogBox ui:field="dialogBox" text="Remote Procedure Call"
