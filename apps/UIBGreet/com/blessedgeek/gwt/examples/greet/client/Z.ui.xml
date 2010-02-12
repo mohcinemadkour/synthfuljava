@@ -6,16 +6,20 @@
 			font-weight: bold;
 		}
 	</ui:style>
-	<g:DialogBox ui:field="dialogBox"
-	 text="Remote Procedure Call"
-	 animationEnabled="true"
-	 >
-		<g:VerticalPanel horizontalAlignment="ALIGN_RIGHT">
-			<g:Label>Sending name to the server:</g:Label>
-			<g:Label ui:field="textToServerLabel"/>
-			<g:Label>Server replies:</g:Label>
-			<g:HTML ui:field="serverResponseLabel"/>
-			<g:Button ui:field="closeButton" text="Close"/>
-		</g:VerticalPanel>
-	</g:DialogBox>
+	<g:VerticalPanel>
+		<g:HorizontalPanel ui:field="hPanel">
+			<g:Button ui:field="sendButton" text="Send" />
+			<g:TextBox ui:field="nameField" text="GWT User" />
+		</g:HorizontalPanel>
+		<g:DialogBox ui:field="dialogBox" text="Remote Procedure Call"
+			animationEnabled="true">
+			<g:VerticalPanel horizontalAlignment="ALIGN_RIGHT">
+				<g:Label>Sending name to the server:</g:Label>
+				<g:Label ui:field="textToServerLabel" />
+				<g:Label>Server replies:</g:Label>
+				<g:HTML ui:field="serverResponseLabel" />
+				<g:Button ui:field="closeButton" text="Close" />
+			</g:VerticalPanel>
+		</g:DialogBox>
+	</g:VerticalPanel>
 </ui:UiBinder> 

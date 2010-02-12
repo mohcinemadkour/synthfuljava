@@ -17,6 +17,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -49,6 +50,27 @@ public class Z
 
 
 	@UiField
+	HorizontalPanel hPanel;
+	@UiField
+	Button sendButton;
+	@UiField
+	TextBox nameField;
+	
+	//Fired when user clicks send Button
+	@UiHandler("sendButton") 
+	public void sendOnClick(ClickEvent event){
+		sendNameToServer();
+	}
+
+	//Fired when user types in the nameField.
+	@UiHandler("nameField") 
+	public void nameOnKeyUp(KeyUpEvent event){
+		if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
+			sendNameToServer();
+		}
+	}
+	
+	@UiField
 	DialogBox dialogBox;
 	@UiField
 	Label textToServerLabel;
@@ -58,16 +80,13 @@ public class Z
 	Button closeButton;
 	
 	@UiHandler("closeButton") 
-	public void onClick(ClickEvent event)
+	public void closeOnClick(ClickEvent event)
 	{
 		dialogBox.hide();
 		sendButton.setEnabled(true);
 		sendButton.setFocus(true);
 	}
 	
-	
-	final Button sendButton = new Button("Send");
-	final TextBox nameField = new TextBox();
 	/**
 	 * This is the entry point method.
 	 */
@@ -80,99 +99,50 @@ public class Z
 		sendButton.addStyleName("sendButton");
 
 		// Add the nameField and sendButton to the RootPanel
-		// Use RootPanel.get() to get the entire body element
-		RootPanel.get("nameFieldContainer").add(nameField);
-		RootPanel.get("sendButtonContainer").add(sendButton);
+		RootPanel.get("here").add(hPanel);
 
 		// Focus the cursor on the name field when the app loads
 		nameField.setFocus(true);
 		nameField.selectAll();
-
-		// Add a handler to send the name to the server
-		MyHandler handler = new MyHandler();
-		sendButton.addClickHandler(handler);
-		nameField.addKeyUpHandler(handler);
 	}
 	
-	@Deprecated // not used, replaced by UIBinder dialogbox
-	private void initDialogBox(){
-		// Create the popup dialog box
-		dialogBox.setText("Remote Procedure Call");
-		dialogBox.setAnimationEnabled(true);
-		// We can set the id of a widget by accessing its Element
-		closeButton.getElement().setId("closeButton");
-		final Label textToServerLabel = new Label();
-		final HTML serverResponseLabel = new HTML();
-		VerticalPanel dialogVPanel = new VerticalPanel();
-		dialogVPanel.addStyleName("dialogVPanel");
-		dialogVPanel.add(new HTML("<b>Sending name to the server:</b>"));
-		dialogVPanel.add(textToServerLabel);
-		dialogVPanel.add(new HTML("<br><b>Server replies:</b>"));
-		dialogVPanel.add(serverResponseLabel);
-		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-		dialogVPanel.add(closeButton);
-		dialogBox.setWidget(dialogVPanel);
+	private void sendNameToServer(){
+		HashMap<String, String> params = new HashMap<String, String>();
+		String textToServer = nameField.getText();
+		params.put("name", textToServer);
+		textToServerLabel.setText(textToServer);
+		serverResponseLabel.setText("");
+		sendButton.setEnabled(false);
+		
+		greetingService.doServiceResponse(params,serverCallBack);
 	}
 	
-	class MyHandler
-	implements ClickHandler, KeyUpHandler
-	{
-		/**
-		 * Fired when the user clicks on the sendButton.
-		 */
-		public void onClick(ClickEvent event){
-			sendNameToServer();
-		}
-	
-		/**
-		 * Fired when the user types in the nameField.
-		 */
-		public void onKeyUp(KeyUpEvent event){
-			if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER){
-				sendNameToServer();
+	private final AsyncCallback<Map<String, String>> serverCallBack =
+		new AsyncCallback<Map<String, String>>()
+		{
+			public void onFailure(Throwable caught){
+				// Show the RPC error message to the user
+				dialogBox
+					.setText("Remote Procedure Call - Failure");
+				serverResponseLabel
+					.addStyleName("serverResponseLabelError");
+				serverResponseLabel.setHTML(SERVER_ERROR);
+				dialogBox.center();
+				closeButton.setFocus(true);
 			}
-		}
+
+			public void onSuccess(Map<String, String> result){
+				dialogBox.setText("Remote Procedure Call");
+				serverResponseLabel
+					.removeStyleName("serverResponseLabelError");
+				String s = "Hello, "
+				+ result.get("name") + "!<br><br>I am running " + result.get("serverInfo")
+				+ ".<br><br>It looks like you are using:<br>" + result.get("userAgent");
+				
+				serverResponseLabel.setHTML(s);
+				dialogBox.center();
+				closeButton.setFocus(true);
+			}
+		};
 	
-		/**
-		 * Send the name from the nameField to the server and wait for a response.
-		 */
-		private void sendNameToServer(){
-			HashMap<String, String> params = new HashMap<String, String>();
-			sendButton.setEnabled(false);
-			String textToServer = nameField.getText();
-			textToServerLabel.setText(textToServer);
-			serverResponseLabel.setText("");
-			params.put("name", textToServer);
-			
-			greetingService.doServiceResponse(
-				params,
-				new AsyncCallback<Map<String, String>>()
-				{
-					public void onFailure(Throwable caught){
-						// Show the RPC error message to the user
-						dialogBox
-							.setText("Remote Procedure Call - Failure");
-						serverResponseLabel
-							.addStyleName("serverResponseLabelError");
-						serverResponseLabel.setHTML(SERVER_ERROR);
-						dialogBox.center();
-						closeButton.setFocus(true);
-					}
-	
-					public void onSuccess(Map<String, String> result){
-						dialogBox.setText("Remote Procedure Call");
-						serverResponseLabel
-							.removeStyleName("serverResponseLabelError");
-						String s = "Hello, "
-						+ result.get("name") + "!<br><br>I am running " + result.get("serverInfo")
-						+ ".<br><br>It looks like you are using:<br>" + result.get("userAgent");
-						
-						serverResponseLabel.setHTML(s);
-						dialogBox.center();
-						closeButton.setFocus(true);
-					}
-				}//AsyncCallback
-			);
-		}//sendNameToServer
-	}//class MyHandler
 }
