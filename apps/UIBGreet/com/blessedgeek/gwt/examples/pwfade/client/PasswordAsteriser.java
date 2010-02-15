@@ -8,12 +8,8 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -38,7 +34,7 @@ public class PasswordAsteriser
 	private String passwordString;
 	
 	@UiHandler ("password")
-	public void onMouseOut(MouseOutEvent event){
+	public void asteriseOnMouseOut(MouseOutEvent event){
 		this.passwordString = password.getText();
 		String masked = "*****";
 		for(int i=5; i<this.passwordString.length(); i++)
@@ -46,7 +42,7 @@ public class PasswordAsteriser
 		password.setText(masked);
 	}
 	@UiHandler ("password")
-	public void onMouseOver(MouseOverEvent event){
+	public void deasteriseOnMouseOver(MouseOverEvent event){
 		password.setText(this.passwordString);
 	}
 
