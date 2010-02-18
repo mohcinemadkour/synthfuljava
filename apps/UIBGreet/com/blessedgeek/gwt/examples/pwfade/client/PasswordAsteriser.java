@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
@@ -63,21 +64,16 @@ public class PasswordAsteriser
 	static public class UIGrid
 		extends Grid
 	{
-		public UIGrid(){
-			this.resize(3, 2);
+		public @UiConstructor UIGrid(int rowCount, int columnCount){
+			this.resize(rowCount, columnCount);
 		}
-		public void setRowCount(int n){
-			this.numRows = n;
-		}
-		public void setColumnCount(int n){
-			this.numColumns = n;
-		}
+
 		public void add(Widget w){
 			int row = this.count/this.numColumns;
 			int col = this.count - row*this.numColumns ;
 			this.count++;
 			if (this.numRows<row)
-				this.setRowCount(row);
+				this.numRows = row;
 			this.setWidget(row, col, w);
 		}
 		
