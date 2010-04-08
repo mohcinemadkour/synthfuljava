@@ -7,11 +7,6 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
 
-import org.synthful.gwt.vaadin.SynApplication;
-
-import com.syntercourse.jdo.userInfo.UserValidation;
-
-
 public abstract class SynJDO<T extends SynJDO<?>>
 {
 	public SynJDO<?> makePersistent()
