@@ -6,6 +6,7 @@ import org.synthful.smartgwt.client.HasWidgetsUtil;
 
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuBar;
 
@@ -16,10 +17,15 @@ public class UIMenuBar
 
 	@Override
 	public void add(Widget w) {
-		if (w!=null && w instanceof UIMenu){
-			UIMenu[] mm = {(UIMenu)w};
-			int position = super.getMembers().length;
-			super.addMenus(mm, position);	
+		if (w!=null){ 
+			if( w instanceof UIMenu){
+				UIMenu[] mm = {(UIMenu)w};
+				int position = super.getMembers().length;
+				super.addMenus(mm, position);	
+			}
+			else if (w instanceof Canvas){
+				super.addMember((Canvas)w);
+			}
 		}
 	}
 

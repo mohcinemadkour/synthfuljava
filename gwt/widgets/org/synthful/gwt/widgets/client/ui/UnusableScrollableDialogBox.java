@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * This class is an attempt to patch DialogBox to give it a close
- * button at the right corner of the caption.<br>
+ * button at the right corner of the captionTitle.<br>
  * 
  * This class is unusable as explained in comments in the constructor
  * below. It is retained as an illustration why we have to use the
@@ -53,12 +53,12 @@ public class UnusableScrollableDialogBox
 
         Element td01 = getCellElement(0, 1);
         
-        // We should reuse the caption so that getCaption, getText and getHtml
+        // We should reuse the captionTitle so that getCaption, getText and getHtml
         // methods do not need to be rewritten and over-riden.
         Widget caption = (Widget)this.getCaption();
         
         // The following fails because removeFromParent requires
-        // parent's private widget = caption, but caption was adopted not added
+        // parent's private widget = captionTitle, but captionTitle was adopted not added
         // so the parent did not register it as a child widget.
         caption.removeFromParent(); 
         Widget p = caption.getParent();
@@ -67,7 +67,7 @@ public class UnusableScrollableDialogBox
         
         // The following fails because add() function requires prospective child
         // widget to have null parent, but earlier parent's failure to acknowledge
-        // caption as a child aborted the parent removal procedure resulting
+        // captionTitle as a child aborted the parent removal procedure resulting
         // in the child still acknowledging the parent.
         CaptionPanel.add(caption);
         adopt(this.CaptionPanel);
