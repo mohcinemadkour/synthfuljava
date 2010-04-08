@@ -61,12 +61,14 @@ abstract public class BodyLayoutWindowWithButton
 	
 	public void addEmbedded(String caption, String uri, int type)
 	{
+		ExternalResource page = new ExternalResource(uri);
 		Embedded e =
-			new Embedded(caption, new ExternalResource(uri));
+			new Embedded(caption, blankPage);
 		
 		e.setType(type);
 		this.addComponent(e);
 		e.setSizeFull();
+		e.setSource(page);
 	}
 	
 	public void addComponent(Component c)
@@ -97,4 +99,5 @@ abstract public class BodyLayoutWindowWithButton
 	final protected BodyLayoutWindowWithButton<S> thisWin = this;
 	final protected S synApp;
 	final public VerticalLayout body;
+	final static ExternalResource blankPage = new ExternalResource("about:blank");
 }
