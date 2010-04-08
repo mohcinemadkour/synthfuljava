@@ -54,7 +54,7 @@ import com.vaadin.ui.Window;
 public abstract class SynApplication
 <T extends SynApplication<?,?>, W extends Window>
 	extends Application
-	implements TransactionListener, Serializable, ParameterHandler, UserChangeListener
+	implements Serializable, UserChangeListener
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -67,7 +67,7 @@ public abstract class SynApplication
 		
 		ApplicationContext ctx = this.getContext();
 		this.setWebAppCtx(ctx);
-		ctx.addTransactionListener(this);
+		ctx.addTransactionListener(this.getHttpRequest);
 	}
 	
 	public void setSynUser(UserBridge u)
@@ -91,40 +91,42 @@ public abstract class SynApplication
 		return (W) super.getMainWindow();
 	}
 	
-	@Override
-	public void transactionStart(
-		Application application,
-		Object transactionData)
+	private TransactionListener getHttpRequest =
+		new TransactionListener()
 	{
-		HttpServletRequest request = (HttpServletRequest)transactionData;
-		this.requestInfo.setRequestInfo(request);
-		this.handleParameters(requestInfo.parameters);
-		logger.info("#attribs:"+requestInfo.attributes.size());
-	}
+		private static final long serialVersionUID = 1L;
 
-	@Override
-	public void transactionEnd(
-		Application application, Object transactionData)
-	{
-	// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void handleParameters(Map<String, String[]> parameters)
-	{
-		if (parameterHandlerList != null)
+		@Override
+		public void transactionStart(
+			Application application,
+			Object transactionData)
 		{
-			Object[] handlers;
-			synchronized (parameterHandlerList)
-			{
-				handlers = parameterHandlerList.toArray();
-			}
-			for (int i = 0; i < handlers.length; i++)
-			{
-				((ParameterHandler) handlers[i]).handleParameters(parameters);
+			HttpServletRequest request = (HttpServletRequest)transactionData;
+			requestInfo.setRequestInfo(request);
+			handleParameters(requestInfo.parameters);
+			logger.info("#attribs:"+requestInfo.attributes.size());
+		}
+
+		@Override
+		public void transactionEnd(
+			Application application, Object transactionData){
+		// TODO Auto-generated method stub
+		}
+		
+		public void handleParameters(Map<String, String[]> parameters){
+			if (parameterHandlerList != null){
+				Object[] handlers;
+				synchronized (parameterHandlerList)
+				{
+					handlers = parameterHandlerList.toArray();
+				}
+				for (int i = 0; i < handlers.length; i++){
+					((ParameterHandler) handlers[i]).handleParameters(parameters);
+				}
 			}
 		}
-	}
+	};
+	
 	
     /**
      * @param handler
