@@ -4,7 +4,8 @@
   xmlns:gz="urn:import:org.synthful.gwt.widgets.client.ui"
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style>
-    .caption {
+    .captionTitle {
+      background: #eeeeee;
       text-shadow: rgba(255, 255, 255, 1) 0 1px 1px;
       font-size: 1.2em;
       font-weight: bold;
@@ -14,10 +15,12 @@
       text-align: center;
       float: right;
       position: relative;
-      left:-50%;
+      width: 90%;
+      left: -5%;
     }
         
     .closer {
+      background: #eeeeee;
       text-shadow: rgba(255, 255, 255, 1) 0 1px 1px;
       font-size: 1.4em;
       font-weight: bold;
@@ -36,6 +39,6 @@
   </ui:style>
   <g:HTMLPanel ui:field="captionPanel" height="1.4em">
     <g:Label ui:field='closer' addStyleNames='{style.closer}'>X</g:Label>
-    <g:HTML ui:field="captionTitle" addStyleNames='{style.caption}'>Login</g:HTML>
+    <g:HTML ui:field="captionTitle" addStyleNames='{style.captionTitle}'>Login</g:HTML>
   </g:HTMLPanel>
 </ui:UiBinder>
