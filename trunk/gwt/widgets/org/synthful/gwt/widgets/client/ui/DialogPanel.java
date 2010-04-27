@@ -254,16 +254,8 @@ public class DialogPanel
 		Element td01 = getCellElement(0, 1);
 		DOM.appendChild(td01, this.captionPanel.getElement());
 		adopt(this.captionPanel);
-		//captionPanel.add(this.caption);
-		//captionPanel.add(this.closer);
-		//super.setWidget(this.contentPanel);
-		//this.setWidthPx(200);
 
 		this.CloserEventHandlers.add(new CloserHandler());
-
-		// closer.addClickHandler(closerHandler);
-		// closer.addMouseOutHandler(closerHandler);
-		// closer.addMouseOverHandler(closerHandler);
 
 		this.captionPanel.setStyleName("Caption");
 

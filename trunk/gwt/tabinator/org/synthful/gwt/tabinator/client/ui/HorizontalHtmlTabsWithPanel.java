@@ -10,11 +10,15 @@ public class HorizontalHtmlTabsWithPanel
     public HorizontalHtmlTabsWithPanel()
     {
         this.Container = new VerticalPanel();
+    	this.Container.setStyleName(this.PanelStyles.Container);
         initWidget(Container);
         
         this.TabBar = new HorizontalPanel();
-        //this.TabBar.setWidth("150px");
+        //this.TabBar.setHeight("2em");
+        
 
         this.Container.add(TabBar);
+        this.Container.add(Content);
+        //this.Container.setBorderWidth(1);
     }
 }
