@@ -34,7 +34,7 @@ public class JsonSiteMap
     {
         String tabname = htab.get("htab");
         final VerticalHtmlTabsWithFrame vTabPanel =
-            SiteMap.initHTab(tabPanel, tabname);
+        	JsonSiteMap.initHTab(tabPanel, tabname);
         doVSections(vTabPanel, htab);        
     }
     
@@ -48,7 +48,7 @@ public class JsonSiteMap
             JavaScriptObject vsecobj = vsections.get(i);
             JsObjectArray vsection = (JsObjectArray) vsecobj.cast();
             String vsecname = vsection.get("vsection");
-            SiteMap.sectionTitle(vTabPanel, vsecname);
+            JsonSiteMap.sectionTitle(vTabPanel, vsecname);
             HTMLTab[] vtabs = doVTabs(vTabPanel,vsection);
             vTabPanel.selectTab(2);
         }

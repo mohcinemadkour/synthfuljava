@@ -19,6 +19,7 @@ public class UIMenuBar
 		super(vertical, resources);
 	}
 
+	@Override
 	public MenuItem addItem(MenuItem item) {
 		if (item.getText().equals("!")){
 			super.addSeparator();

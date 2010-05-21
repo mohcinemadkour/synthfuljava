@@ -32,7 +32,7 @@ public class SiteBuilder
         tabPanel.alignTabBarHorizontally(HorizontalPanel.ALIGN_RIGHT);
         rootPanel.add(tabPanel, 2, 95);
         tabPanel.setSize("98%", "95%");
-        tabPanel.PanelStyles = SiteMap.htabStyle;
+        tabPanel.PanelStyles = JsonSiteMap.htabStyle;
 
         // generate htabs using data read in
         // from <script> tag in html file
