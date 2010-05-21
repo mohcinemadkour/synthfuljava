@@ -6,7 +6,6 @@ import org.synthful.smartgwt.client.HasWidgetsUtil;
 
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
 
 public class UITabset
