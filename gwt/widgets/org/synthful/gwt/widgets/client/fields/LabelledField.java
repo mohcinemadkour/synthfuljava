@@ -1,7 +1,7 @@
 package org.synthful.gwt.widgets.client.fields;
 
-import org.synthful.gwt.widgets.client.LabelledFieldGrid;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -20,7 +20,7 @@ extends Composite {
 		this.name = name;
 		this.label= labelText;
 		this.field = this.createField();
-		this.setHorizontal();
+		//this.setHorizontal();
 	}
 	
 	abstract protected FieldType createField();
@@ -33,8 +33,8 @@ extends Composite {
 		return grid;
 	}
 
-	public void setGrid(LabelledFieldGrid layout) {
-		this.grid = layout;
+	public void setGrid(LabelledFieldGrid grid) {
+		this.grid = grid;
 	}
 
 	public FieldType getField() {
@@ -95,6 +95,7 @@ extends Composite {
 	}
 
 	protected LabelledFieldServicerAsync<ValueType> labelledFieldServicer;
+	
 	public String name;
 	protected LabelledFieldGrid grid;
 	protected String label;
