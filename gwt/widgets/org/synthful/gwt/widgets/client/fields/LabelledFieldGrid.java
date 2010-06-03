@@ -3,9 +3,8 @@ package org.synthful.gwt.widgets.client.fields;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Widget;
-import com.syntercourse.user.persistence.shared.Profile.FieldEntity;
 
-public class LabelledFieldGrid<T extends FieldEntity>
+public class LabelledFieldGrid
 extends Grid
 {
 
@@ -28,14 +27,11 @@ extends Grid
 			this.setWidget(r, 1, f.getField());
 		}
 		else if (w instanceof FieldSet){
-			FieldSet<T> fs = (FieldSet<T>)w;
+			FieldSet fs = (FieldSet)w;
 			this.resizeRows(r + fs.getFields().size() + 1);
 			
 			this.setHTML(r++, 0, "<br/>"+fs.getCaption());
-			for (LabelledField<?, ?> f : fs.getFields()){
-				this.setText(r, 0, f.getLabel());
-				this.setWidget(r++, 1, f.getField());
-			}
+			r = fs.fillGrid(this, r);
 		}
 		else{
 			r = this.insertRow(r);

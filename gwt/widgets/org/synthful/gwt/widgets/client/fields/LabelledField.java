@@ -1,7 +1,6 @@
 package org.synthful.gwt.widgets.client.fields;
 
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -9,11 +8,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-abstract public class LabelledField<FieldType
-extends Widget & HasName & HasText & HasValue<ValueType>, ValueType>
+abstract public class LabelledField<
+	FldTyp extends Widget & HasName & HasText & HasValue<ValTyp>,
+	ValTyp>
 extends Composite {
 	@UiConstructor
 	public LabelledField(String name, String labelText){
@@ -23,7 +22,7 @@ extends Composite {
 		//this.setHorizontal();
 	}
 	
-	abstract protected FieldType createField();
+	abstract protected FldTyp createField();
 	
 	public String getLabel() {
 		return label;
@@ -37,7 +36,7 @@ extends Composite {
 		this.grid = grid;
 	}
 
-	public FieldType getField() {
+	public FldTyp getField() {
 		return field;
 	}
 
@@ -94,11 +93,11 @@ extends Composite {
 		void setValue(String name, ValueType value);
 	}
 
-	protected LabelledFieldServicerAsync<ValueType> labelledFieldServicer;
+	protected LabelledFieldServicerAsync<ValTyp> labelledFieldServicer;
 	
 	public String name;
 	protected LabelledFieldGrid grid;
 	protected String label;
-	protected FieldType field;
+	protected FldTyp field;
 	protected String description;
 }

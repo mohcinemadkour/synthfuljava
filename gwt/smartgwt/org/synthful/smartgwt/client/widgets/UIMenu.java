@@ -17,7 +17,7 @@ public class UIMenu
 	public void add(Widget w) {
 		if (w!=null && w instanceof UIMenuItem){
 			UIMenuItem mm = (UIMenuItem)w;
-			super.addItem(mm.getMenuItem());	
+			super.addItem(mm.getSmartObject());	
 		}
 	}
 

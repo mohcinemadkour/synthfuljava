@@ -7,13 +7,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-public class LabelledSelectionListField<T extends LabelledSelectionListField.MultiSelect>
+public class LabelledSelectionListField<
+	Multi extends LabelledSelectionListField.MultiSelect>
 extends LabelledField<UISelectionList, String> {
 	
 	@UiConstructor
 	public LabelledSelectionListField(
-		String name, String labelText,
-		boolean isMultipleSelect) {
+		String name, String labelText) {
 		
 		super(name, labelText);
 	}
@@ -29,7 +29,7 @@ extends LabelledField<UISelectionList, String> {
 
 	@Override
 	protected UISelectionList createField() {
-		return new UISelectionList(T.is);
+		return new UISelectionList(Multi.is);
 	}
 	
 	static public interface MultiSelect{

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.synthful.smartgwt.client.HasWidgetsUtil;
+import org.synthful.smartgwt.client.UIMasquerade;
 
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
@@ -12,7 +13,7 @@ import com.smartgwt.client.widgets.tab.Tab;
 
 public class UITab
 	extends Widget
-	implements HasWidgets
+	implements HasWidgets, UIMasquerade<Tab>
 {
 	public UITab(){
 		this.tab = new Tab();
@@ -81,6 +82,10 @@ public class UITab
 		catch (Exception e){}
 	}
 	
+	@Override
+	public Tab getSmartObject() {
+		return this.tab;
+	}
 	
 	final protected Tab tab;
 	private Canvas canvas;
