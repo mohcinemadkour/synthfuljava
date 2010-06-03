@@ -8,10 +8,11 @@ import org.synthful.smartgwt.client.UIMasquerade;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.smartgwt.client.widgets.Canvas;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
-public class UIVLayout
-	extends VLayout
+public class UIHLayout
+	extends HLayout
 	implements HasWidgets
 {
 	public void add(Widget w){

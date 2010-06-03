@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.synthful.smartgwt.client.HasWidgetsUtil;
+import org.synthful.smartgwt.client.UIMasquerade;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.smartgwt.client.core.KeyIdentifier;
-import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuItem;
 import com.smartgwt.client.widgets.menu.MenuItemIfFunction;
@@ -18,7 +18,7 @@ import com.smartgwt.client.widgets.menu.events.ClickHandler;
 
 public class UIMenuItem
 	extends Widget
-	implements HasWidgets
+	implements HasWidgets, UIMasquerade<MenuItem>
 {
 
 	@Override
@@ -45,10 +45,6 @@ public class UIMenuItem
 
 	public HandlerRegistration addClickHandler(ClickHandler handler){
 		return this.menuItem.addClickHandler(handler);
-	}
-
-	public MenuItem getMenuItem(){
-		return this.menuItem;
 	}
 
 	public void setChecked(Boolean checked){
@@ -107,5 +103,10 @@ public class UIMenuItem
 		this.menuItem.setTitle(title);
 	}
 
-	protected MenuItem menuItem=new MenuItem();
+	@Override
+	public MenuItem getSmartObject() {
+		return this.menuItem;
+	}
+
+	final protected MenuItem menuItem=new MenuItem();
 }

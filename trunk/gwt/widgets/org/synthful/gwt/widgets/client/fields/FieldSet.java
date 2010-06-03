@@ -1,15 +1,10 @@
 package org.synthful.gwt.widgets.client.fields;
 
-import java.util.ArrayList;
-
-
 import com.google.gwt.uibinder.client.UiConstructor;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.syntercourse.user.persistence.shared.Profile.FieldEntity;
 
-public class FieldSet<T extends FieldEntity>
-extends Composite {
+public class FieldSet<FldEnt extends FieldEntity>
+extends FieldSetDescriptor<FldEnt, LabelledField<?, ?>> {
 
 	@UiConstructor
 	public FieldSet(String caption) {
@@ -22,40 +17,14 @@ extends Composite {
 			this.fields.add(f);
 		}
 	}
-	
-	public ArrayList<LabelledField<?, ?>> getFields() {
-		return fields;
+			
+	public int fillGrid(LabelledFieldGrid grid, int startRow){
+		for (LabelledField<?, ?> f : this.getFields()){
+			grid.setText(startRow, 0, f.getLabel());
+			grid.setWidget(startRow++, 1, f.getField());
+		}
+		
+		return startRow;
 	}
 
-	public String getCaption() {
-		return caption;
-	}
-
-	public void setCaption(String caption) {
-		this.caption = caption;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	final private ArrayList<LabelledField<?, ?>> fields =
-		new ArrayList<LabelledField<?,?>>();
-	
-	protected String caption;
-	protected String name;
-	protected String description;
-	protected T fieldEntity;
 }

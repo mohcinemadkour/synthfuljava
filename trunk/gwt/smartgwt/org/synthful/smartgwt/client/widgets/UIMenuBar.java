@@ -7,7 +7,6 @@ import org.synthful.smartgwt.client.HasWidgetsUtil;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.smartgwt.client.widgets.Canvas;
-import com.smartgwt.client.widgets.menu.Menu;
 import com.smartgwt.client.widgets.menu.MenuBar;
 
 public class UIMenuBar

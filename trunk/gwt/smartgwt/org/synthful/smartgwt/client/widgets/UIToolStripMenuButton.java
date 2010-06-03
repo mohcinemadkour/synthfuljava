@@ -32,6 +32,4 @@ public class UIToolStripMenuButton
 	public Iterator<Widget> iterator() {
 		return HasWidgetsUtil.iterator(this);
 	}
-
-	private Menu menu;
 }
