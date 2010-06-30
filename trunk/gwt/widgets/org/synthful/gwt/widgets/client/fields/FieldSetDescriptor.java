@@ -1,9 +1,12 @@
 package org.synthful.gwt.widgets.client.fields;
 
 import java.util.ArrayList;
+
+import org.synthful.gwt.mvp.client.PresentationEntity;
+
 import com.google.gwt.user.client.ui.Composite;
 
-public class FieldSetDescriptor<FldEnt extends FieldEntity, A>
+public class FieldSetDescriptor<FldEnt extends PresentationEntity, A>
 extends Composite {
 		
 	public void addFields(A[] ff){

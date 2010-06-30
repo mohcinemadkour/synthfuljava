@@ -1,9 +1,11 @@
 package org.synthful.gwt.widgets.client.fields;
 
+import org.synthful.gwt.mvp.client.PresentationEntity;
+
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.user.client.ui.Widget;
 
-public class FieldSet<FldEnt extends FieldEntity>
+public class FieldSet<FldEnt extends PresentationEntity>
 extends FieldSetDescriptor<FldEnt, LabelledField<?, ?>> {
 
 	@UiConstructor
