@@ -1,8 +1,8 @@
 package com.blessedgeek.sitebuilder.client;
 
-import org.synthful.gwt.jsObjects.client.JsObjectArray;
-import org.synthful.gwt.json.client.JsonHttpResponseHandler;
-import org.synthful.gwt.json.client.JsonRemoteScriptCall;
+import org.synthful.gwt.http.client.JsonHttpResponseHandler;
+import org.synthful.gwt.javascript.client.JsObjectArray;
+import org.synthful.gwt.javascript.client.JsonRemoteScriptCall;
 import org.synthful.gwt.tabinator.client.ui.HorizontalHtmlTabsWithPanel;
 
 import com.google.gwt.core.client.EntryPoint;

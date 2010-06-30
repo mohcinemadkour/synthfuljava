@@ -1,6 +1,6 @@
 package com.blessedgeek.sitebuilder.client;
 
-import org.synthful.gwt.jsObjects.client.JsObjectArray;
+import org.synthful.gwt.javascript.client.JsObjectArray;
 import org.synthful.gwt.tabinator.client.ui.HTMLTab;
 import org.synthful.gwt.tabinator.client.ui.HtmlTabsWithPanel;
 import org.synthful.gwt.tabinator.client.ui.VerticalHtmlTabsWithFrame;

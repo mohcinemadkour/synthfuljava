@@ -12,9 +12,8 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <!-- Other module inherits                                      -->
-  <inherits name="org.synthful.gwt.jsObjects.JsObjects"/>
   <inherits name="org.synthful.gwt.json.JSON"/>
-  <inherits name="org.synthful.gwt.domElements.DomElements"/>
+  <inherits name="org.synthful.gwt.javascript.JSElements"/>
   <inherits name="org.synthful.gwt.tabinator.Tabinator"/>
 
   <!-- Specify the app entry point class.                         -->
