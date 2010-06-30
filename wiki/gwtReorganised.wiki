@@ -18,4 +18,6 @@
  
 ===ScrolledDialogBox.java===
 moved to /trunk/gwt/widgets/com/google/gwt/user/client/ui
- 
+
+===SmartGwt===
+moved to new project http://code.google.com/p/uibinding-smartgwt/
