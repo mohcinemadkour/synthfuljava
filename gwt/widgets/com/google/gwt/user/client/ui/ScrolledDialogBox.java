@@ -474,7 +474,7 @@ public class ScrolledDialogBox
     public void setHeightPx(
         int hgt)
     {
-        this.BodyPanel.setWidth(hgt + "px");
+        this.BodyPanel.setHeight(hgt + "px");
         this.Height = hgt;
     }
 
