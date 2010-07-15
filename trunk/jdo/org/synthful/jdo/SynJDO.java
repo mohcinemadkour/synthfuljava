@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
-import javax.jdo.Transaction;
 
 public abstract class SynJDO<T extends SynJDO<?>>
 {
@@ -48,10 +47,9 @@ public abstract class SynJDO<T extends SynJDO<?>>
 			PersistenceManagerFactorySingleton.getPersistenceManager();
 	}
 	
-	@SuppressWarnings("null")
 	static public <T extends SynJDO<?>>
 		T exists(
-			Class<T> entityClass, Class paramClass,
+			Class<T> entityClass, Class<?> paramClass,
 			String paramName, Object paramValue)
 	{
 		PersistenceManager pm =
@@ -59,10 +57,9 @@ public abstract class SynJDO<T extends SynJDO<?>>
 		return exists(pm, entityClass, paramClass, paramName, paramValue);
 	}
 	
-	@SuppressWarnings("null")
 	static public <T extends SynJDO<?>>
 		T exists(PersistenceManager pm,
-			Class<T> entityClass, Class paramClass,
+			Class<T> entityClass, Class<?> paramClass,
 			String paramName, Object paramValue)
 	{
 		Query query = pm.newQuery(entityClass);
@@ -98,6 +95,7 @@ public abstract class SynJDO<T extends SynJDO<?>>
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	static public <T extends SynJDO<?>>
 		List<T> list(Query query, Object param)
 	{	
@@ -112,7 +110,7 @@ public abstract class SynJDO<T extends SynJDO<?>>
 		}
 	}
 	
-	@SuppressWarnings("null")
+	@SuppressWarnings("unchecked")
 	static public <T extends SynJDO<?>>
 		List<T> listAll(Class<T> entityClass, PersistenceManager pm)
 	{	

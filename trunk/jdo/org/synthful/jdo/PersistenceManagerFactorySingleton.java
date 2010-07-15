@@ -52,7 +52,7 @@ final public class PersistenceManagerFactorySingleton
 		}
 	}
 
-	static public void makePersistent(Collection e)
+	static public void makePersistent(Collection<?> e)
 	{
         PersistenceManager pm = pmfInstance.getPersistenceManager();
 
