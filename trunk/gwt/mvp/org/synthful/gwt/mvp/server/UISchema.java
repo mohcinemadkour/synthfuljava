@@ -79,6 +79,7 @@ public class UISchema
 			Element elem = xmldoc.createElement("xsd:element");
 			//if Field is an entity
 			if (PresentationEntity.class.isAssignableFrom(fcls)) {
+				@SuppressWarnings("unchecked")
 				Element ent = this.doEntity(
 					(Class<? extends PresentationEntity>) fcls);
 				if (ent!=null && ent.hasChildNodes()){
@@ -109,6 +110,7 @@ public class UISchema
 				if (type instanceof ParameterizedType) {
 					ParameterizedType ptype = (ParameterizedType) type;
 					Type[] targs = ptype.getActualTypeArguments();
+					@SuppressWarnings("unchecked")
 					Element ent =
 						this.doEntity(
 							(Class<? extends PresentationEntity>) targs[0]);
@@ -231,7 +233,7 @@ public class UISchema
 		if (e2.hasChildNodes())
 			e1.appendChild(e2);			
 	}
-	private void doRestrictions(Element e1, Presentable presFld){
+	private boolean doRestrictions(Element e1, Presentable presFld){
 		boolean hasRestrict = false;
 		int z = -1;
 		float zf = -1;
@@ -284,6 +286,8 @@ public class UISchema
 		
 		if (e2.hasChildNodes())
 			e1.appendChild(e2);
+		
+		return hasRestrict;
 
 		//String[]zss = presFld.enumeration();
 	}
