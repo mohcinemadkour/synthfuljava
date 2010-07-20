@@ -317,17 +317,14 @@ implements TreeNode<K, V>{
 	 */
 	public TreeNode<K, V>  cut(K[] keys) {
 		HashMapTreeNode<K, V> myH = getParentOf(keys);
-		if (myH == null)
-			return null;
+		if (myH == null) return null;
+		
 		K lastKey = keys[keys.length-1];
 		TreeNode<K, V> item = myH.get(lastKey);
-
-		if (myH!=null) {
-			myH.remove(lastKey);
-			myH.KeysVector.remove(lastKey);
-			return item;
-		}
-		return null;
+		myH.remove(lastKey);
+		myH.KeysVector.remove(lastKey);
+		
+		return item;
 	}
 
 	/**
