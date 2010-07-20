@@ -61,7 +61,7 @@ public class UnusableScrollableDialogBox
         // parent's private widget = captionTitle, but captionTitle was adopted not added
         // so the parent did not register it as a child widget.
         caption.removeFromParent(); 
-        Widget p = caption.getParent();
+        // Widget p = caption.getParent();
         DOM.removeChild(td01, caption.getElement());
         DOM.appendChild(td01, this.CaptionPanel.getElement());
         
