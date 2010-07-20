@@ -16,9 +16,10 @@ package org.synthful.gwt.widgets.client.ui;
  * the License.
  */
 
-import com.google.gwt.dom.client.Document;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -39,12 +40,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.ResizeComposite;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another
