@@ -1,0 +1,3 @@
+<module>
+  <inherits name="org.synthful.gwt.mvp.MVP"/>
+</module>
