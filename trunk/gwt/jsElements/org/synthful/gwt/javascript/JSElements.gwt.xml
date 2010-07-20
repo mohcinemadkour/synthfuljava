@@ -5,5 +5,4 @@ Therefore, exclude library modules from gwt entrypoint compilation list.
 -->
 <module>
   <inherits name="com.google.gwt.user.User"/>
-  <inherits name="com.google.gwt.core.CORE"/>
 </module>

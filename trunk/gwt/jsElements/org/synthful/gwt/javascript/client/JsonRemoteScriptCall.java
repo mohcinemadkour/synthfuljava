@@ -52,13 +52,18 @@ abstract public class JsonRemoteScriptCall
     }
     
     private native static void bridgeCallbackNames(
-        JsonRemoteScriptCall hdlr, String callbackName )
-    /*-{
+        JsonRemoteScriptCall hdlr, String callbackName )/*-{
         jsonRSCcallback = function( j ){
             hdlr.@org.synthful.gwt.javascript.client.JsonRemoteScriptCall::onJsonRSCResponse(Lcom/google/gwt/core/client/JavaScriptObject;)( j );
         };
         eval( "window."+callbackName+"=jsonRSCcallback" );
     }-*/;
+    
+    /*
+	    $wnd[callbackName] = function(j) {
+	    	hdlr.@org.synthful.gwt.javascript.client.JsonRemoteScriptCall::onJsonRSCResponse(Lcom/google/gwt/core/client/JavaScriptObject;)( j );
+	    }
+    */
 
     abstract public void onJsonRSCResponse( JavaScriptObject json );
 }
