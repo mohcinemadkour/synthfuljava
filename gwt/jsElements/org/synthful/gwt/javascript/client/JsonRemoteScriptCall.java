@@ -34,8 +34,22 @@ abstract public class JsonRemoteScriptCall
 {
     public JsonRemoteScriptCall() {}
     
-    // use this call if dynamic remote data source and therefore able to
-    // dynamically code the callback at the end of the json stream
+    /**
+     * use this call if dynamic remote data source and therefore able to
+     * dynamically code the callback js function at the end of the json stream.
+     *
+     * This procedure would generate a unique js function name and
+     * send the server with reqestURI?callBackParameter=uniquelyGeneratedJsFunctionName
+     * so that the server-side would expect
+     * <ul>
+     * <li> to grab uniquelyGeneratedJsFunctionName thro callBackParameter,
+     * <li> and then generate the json,
+     * <li> assign a var to that json, var whatever={json structure}
+     * <li> append to the end of the json the JS functon call:<br/>
+     * 
+     * uniquelyGeneratedJsFunctionName(whatever);
+     * 
+     */
     public void callByCallBackParameter( String url, String callBackParameter )
     {
         String uniqCallbackName = "jsonRSC"+this.hashCode();
@@ -43,11 +57,25 @@ abstract public class JsonRemoteScriptCall
         call( url, uniqCallbackName );
     }   
 
-    // use this call if remote data source is static file and the callback
-    // has be hard-coded at the end of the json file
-    public void call( String url, String callbackName )
+    /**
+     * use this call if remote data source is static file and the callback
+     * has be hard-coded at the end of the json file,
+     * where you predetermine the name of the callbackJsFunctionName,</br>
+     * 
+     * and made sure you appended that you assigned the json structure to a var
+     * and then appended the function call</br>
+     *   callbackJsFunctionName(whatever);</br>
+     * to the end of the json structure.</br>
+     * Then bridgeCallbackNames would map that callbackJsFunctionName to
+     * the GWT method name onJsonRSCResponse.</br>
+     * DomUtils.jsAddScript would read the jsonp and insert it as a script into the local DOM,
+     * resulting in the json being converted into a JavascriptObject.
+     * Then eval would call callbackJsFunctionName with the JavascriptObject as argument,
+     * which in effect is calling onJsonRSCResponse with the JavascriptObject as argument.
+     */
+    public void call( String url, String callbackJsFunctionName )
     {
-        bridgeCallbackNames( this, callbackName );
+        bridgeCallbackNames( this, callbackJsFunctionName );
         DomUtils.jsAddScript(url);
     }
     
@@ -65,5 +93,5 @@ abstract public class JsonRemoteScriptCall
 	    }
     */
 
-    abstract public void onJsonRSCResponse( JavaScriptObject json );
+    abstract public void onJsonRSCResponse( JavaScriptObject jso );
 }
