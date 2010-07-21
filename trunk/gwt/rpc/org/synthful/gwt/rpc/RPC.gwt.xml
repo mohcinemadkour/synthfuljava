@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--
+Library modules do not specify entrypoint.
+Therefore, exclude library modules from gwt entrypoint compilation list.
+--><module>
+	<inherits name="com.google.gwt.user.User"/>
+</module>
