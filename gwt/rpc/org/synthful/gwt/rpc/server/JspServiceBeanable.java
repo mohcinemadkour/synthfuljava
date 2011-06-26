@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.el.ELContext;
 import javax.servlet.Servlet;
@@ -43,7 +44,7 @@ abstract public class JspServiceBeanable
     protected boolean isGWTRPCService;
     protected boolean bodyNeedsPopping;
     
-    protected String doJspService(HashMap<String, String> parameters)
+    protected String doJspService(Map<String, String> parameters)
     {
         this.parameters = new Hashtable<String, String>(parameters);
         
