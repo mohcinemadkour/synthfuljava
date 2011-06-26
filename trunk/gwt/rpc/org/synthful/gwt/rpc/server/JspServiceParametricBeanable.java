@@ -1,6 +1,6 @@
 package org.synthful.gwt.rpc.server;
 
-import java.util.HashMap;
+import java.util.Map;
 
 
 
@@ -9,7 +9,7 @@ abstract public class JspServiceParametricBeanable
 {
 
     public String doServiceResponse(
-        HashMap<String, String> parameters)
+        Map<String, String> parameters)
     {   
         return this.doJspService(parameters);
     }
