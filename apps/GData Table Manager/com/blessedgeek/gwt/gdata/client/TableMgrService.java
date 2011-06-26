@@ -2,8 +2,8 @@ package com.blessedgeek.gwt.gdata.client;
 
 import java.util.Map;
 
-import org.synthful.gwt.http.servlet.client.HashedParameterService;
-import org.synthful.gwt.http.servlet.client.ParameterService;
+import org.synthful.gwt.rpc.client.HashedParameterService;
+import org.synthful.gwt.rpc.client.ParameterService;
 
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 

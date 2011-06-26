@@ -12,11 +12,9 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <!-- Other module inherits                                      -->
- <inherits name="org.synthful.gwt.http.servlet.OriginServerCall"/>
- <inherits name="org.synthful.gwt.domElements.DomElements"/>
  <inherits name="org.synthful.gwt.gdata.GData"/>
  <inherits name="org.synthful.gwt.widgets.Widgets"/>
- <inherits name="org.synthful.gwt.jsObjects.JsObjects"/>
+ <inherits name="org.synthful.gwt.rpc.RPC"/>
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class="com.blessedgeek.gwt.gdata.client.TableMgr"/>
