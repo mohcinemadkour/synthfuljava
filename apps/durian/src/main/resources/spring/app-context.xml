@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd"
+		>
+
+    <bean id="greeting" class="java.lang.String">
+        <constructor-arg type="java.lang.String" value="#### Hello Bellow ####" />
+    </bean>
+    
+    <bean id="message" class="com.blessedgeek.angst.app.durian.Message">
+        <constructor-arg type="java.lang.String" value="Open" />
+    </bean>
+    
+    <bean id="aProperties" class="com.blessedgeek.angst.common.AngstaProperties">
+    	<property name="propertiesTextFile" value="/properties/a.properties"/>
+    </bean>
+
+	<context:component-scan base-package="com.blessedgeek.angst.app.durian" />
+
+</beans>
