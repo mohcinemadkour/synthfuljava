@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.blessedgeek.angst.common.AAngsta;
 
 @Controller
+@RequestMapping("/duriangrove")
 public class DurianGroveMVController
 extends AAngsta{
 

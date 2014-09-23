@@ -8,7 +8,7 @@
 </head>
 <body>
 <h2>Hello Durian</h2>
-<form method="post" action="h2g2j" name="h2g2form">
+<form method="post" action="duriangrove/h2g2j" name="h2g2form">
 <table cellpadding="2" cellspacing="2">
 <tbody>
 <tr>
