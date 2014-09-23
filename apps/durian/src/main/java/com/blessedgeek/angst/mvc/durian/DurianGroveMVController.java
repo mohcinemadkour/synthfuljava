@@ -1,28 +1,17 @@
 package com.blessedgeek.angst.mvc.durian;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.blessedgeek.angst.app.durian.Wally;
 import com.blessedgeek.angst.common.AAngsta;
 
 @Controller
-public class DurianMVController
+public class DurianGroveMVController
 extends AAngsta{
 
-	private Wally wally;
-
-	@Inject
-	public void setWally(Wally wally){
-		this.wally = wally;
-		getLogger().info("mvc wally={}", wally);		
-	}
-	
 	/**
 	 * 
 	 * @param model
@@ -30,15 +19,18 @@ extends AAngsta{
 	 * @throws Exception
 	 * 
 	 * Browser url:
-	 *  http://{hostname}:{port}/{context}/v/h1
+	 *  http://{hostname}:{port}/{context}/v/h2g2j
 	 * e.g.,
-	 *  http://localhost:8080/durian/v/h1
+	 *  http://localhost:8080/durian/v/h2g2j
 	 */
-    @RequestMapping(value = "/h1", method = RequestMethod.GET)
-	public String handleRequestJoyfully()			
+    @RequestMapping(value = "/h2g2j", method = {RequestMethod.GET,RequestMethod.POST})
+	public String anotherHandleRequest(ModelMap model,
+			@RequestParam("who") String who,
+			@RequestParam("what") String what,
+			@RequestParam("when") String when)			
 	throws Exception {
 		
-		getLogger().info("handleRequestJoyfully");
-		return "Hello";
+		getLogger().info("anotherHandleRequest: {},{},{} ", who, what, when);
+		return "Cello";
 	}
 }
