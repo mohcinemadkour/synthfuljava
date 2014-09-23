@@ -14,6 +14,8 @@ extends AAngsta{
 	private String greeting;
 	private Message message;
 	private AngstaProperties aProperties;
+	private String wName;
+	private int wValue;
 	
 	@Inject
 	public void setGreeting (String greeting) {
@@ -31,6 +33,13 @@ extends AAngsta{
 	public void setAProperties(AngstaProperties aProperties) {
 		this.aProperties = aProperties;
 		getLogger().info("aProperties={}", aProperties);
+	}
+	
+	@Inject
+	public void setWally(Wally wally){
+		this.wName = wally.getName();
+		this.wValue = wally.getValue();
+		getLogger().info("wally={}", wally);		
 	}
 	
 	UserChangeService(){
