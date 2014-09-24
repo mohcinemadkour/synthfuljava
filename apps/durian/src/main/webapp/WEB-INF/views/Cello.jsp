@@ -8,5 +8,6 @@
 </head>
 <body>
 <h2>Cello Tremello</h2>
+${who} ${why}
 </body>
 </html>

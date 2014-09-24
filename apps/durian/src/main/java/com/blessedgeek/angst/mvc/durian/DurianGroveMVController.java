@@ -30,6 +30,8 @@ extends AAngsta{
 			@RequestParam("what") String what,
 			@RequestParam("when") String when)			
 	throws Exception {
+		model.addAttribute("who", who);
+		model.addAttribute("why", "does the sea rush to shore?");
 		
 		getLogger().info("anotherHandleRequest: {},{},{} ", who, what, when);
 		return "Cello";
